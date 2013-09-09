@@ -1,5 +1,5 @@
 echo "compiling ..."
-bcc -c -ansi bc.c
+bcc -c -ansi -O3 bc.c
 as86 -o bs.o bs.s
 echo linking .....
 ld86 -d -o booter bs.o bc.o /usr/lib/bcc/libc.a
