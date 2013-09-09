@@ -1,0 +1,17 @@
+echo "compiling ..."
+bcc -c -ansi bryce.c
+as86 -o bs.o bs.s
+echo linking .....
+ld86 -d -o booter bs.o bryce.o /usr/lib/bcc/libc.a
+ls -l booter
+
+echo dumping booter ....
+dd if=booter of=mtximage bs=1024 count=1 conv=notrunc
+
+rm *.o
+echo done.
+echo ready to run QEMU on mtximage
+read dummy
+
+qemu -fda mtximage -no-fd-bootchk
+
