@@ -32,43 +32,36 @@ int gets(char *s)
 	*s =0;
 }
 
-
 u32 search(INODE *iPtr, char *name)
 {
 	DIR *dirp;
 	char c;
-	u32		node = 0;
 	getblk((u16)iPtr->i_block[0], buf2);
 	dirp = (DIR *)buf2;
 
 	while((char *)dirp < &buf2[BLK]){
 		c = dirp->name[dirp->name_len];
 		dirp->name[dirp->name_len] = 0;
-		prints(dirp->name); putc(' ');
 		if (strcmp(name, dirp->name) == 0 ){
 			dirp->name[dirp->name_len] = c;
-			node = dirp->inode;
-			break;
+			return dirp->inode;
 		} else {
 			dirp->name[dirp->name_len] = c;
 			dirp = (DIR *)((char *)dirp + dirp->rec_len);
 		}
 	}
-	return node;
+	return 0;
 }
 main()
 {
-	u16		iblk;
+	u16		i,iblk;
 	INODE	*ip;
 	GD		*gp;
-	DIR		*dp;
-	u32 ino=0;
-
+	u32 	ino=0;
 
 	getblk(2, buf1); // read descriptor block #w into buf1
 	gp = (GD *)buf1;
 	iblk = (u16)gp->bg_inode_table;
-	prints("inodes blk = "); putc(iblk + '0'); prints("\n\r");
 
 	getblk((u16)iblk, buf1); // read first inode block
 	ip = (INODE *)buf1 + 1;  // ip->root inode #2
@@ -76,12 +69,25 @@ main()
 	// get boot inode
 	prints("enter a filename to boot: ");
 	gets(temp);
-	prints("\n\r");
 
 	ino = search(ip, "boot");
-	ip = (INODE *)buf1 + ino -1;
+	getblk(ino/8+iblk,buf1);
+	ip = (INODE *)buf1 + (ino-1)%8;
 	ino = search(ip, temp);
-	ip = (INODE *)buf1 + ino -1;
-	getblk((u16)ip->i_block[0],0x1000);
-	return 1;
+	putc((ino - 10) + '0');
+	getblk(ino/8+iblk,buf1);
+	ip = (INODE *)buf1 + (ino-1)%8;
+/*	ino = search(ip, temp);
+	putc((ino % 10) + '0');
+	getc();
+	/*setes(0x1000);
+
+	for (i=0; i < 12; i++){
+		if (ip->i_block[i] == 0 ){
+			break;
+		}
+		getblk((u16)ip->i_block[i], 0 ); putc('.');
+		inces();
+	}*/
+	getc();
 }
