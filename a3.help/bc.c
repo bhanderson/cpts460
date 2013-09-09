@@ -19,7 +19,7 @@ u16 getblk(u16 blk, char *buf)
 	readfd( blk/18, ((blk*2)%36)/18, ((blk*2)%36)%18, buf);
 }
 
-/*u32 search(INODE *inodePtr, char *name)
+u32 search(INODE *inodePtr, char *name)
 {
 	DIR *dp = (DIR *) buf3;
 	int i,j;
@@ -44,7 +44,7 @@ u16 getblk(u16 blk, char *buf)
 		}
 	}
 	return 0;
-}*/
+}
 
 int prints(char *s)
 {

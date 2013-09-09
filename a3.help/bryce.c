@@ -34,10 +34,9 @@ int gets(char *s)
 
 u32 search(INODE *iPtr, char *name)
 {
-	DIR *dirp;
+	DIR *dirp = (DIR*) buf2;
 	char c;
 	getblk((u16)iPtr->i_block[0], buf2);
-	dirp = (DIR *)buf2;
 
 	while((char *)dirp < &buf2[BLK]){
 		c = dirp->name[dirp->name_len];
@@ -57,7 +56,8 @@ main()
 	u16		i,iblk;
 	INODE	*ip;
 	GD		*gp;
-	u32 	ino=0;
+	u32 	ino;
+	u32		*pino;
 
 	getblk(2, buf1); // read descriptor block #w into buf1
 	gp = (GD *)buf1;
@@ -70,24 +70,28 @@ main()
 	prints("enter a filename to boot: ");
 	gets(temp);
 
+
 	ino = search(ip, "boot");
+
 	getblk(ino/8+iblk,buf1);
 	ip = (INODE *)buf1 + (ino-1)%8;
 	ino = search(ip, temp);
-	putc((ino - 10) + '0');
 	getblk(ino/8+iblk,buf1);
 	ip = (INODE *)buf1 + (ino-1)%8;
-/*	ino = search(ip, temp);
-	putc((ino % 10) + '0');
-	getc();
-	/*setes(0x1000);
+	getblk((u16)ip->i_block[12],buf2);
+	setes(0x1000);
 
 	for (i=0; i < 12; i++){
-		if (ip->i_block[i] == 0 ){
-			break;
-		}
-		getblk((u16)ip->i_block[i], 0 ); putc('.');
+		getblk((u16)ip->i_block[i], BLK*i ); putc('.');
 		inces();
-	}*/
+	}
+	puts('1');
+	pino = (u32 *)buf2;
+	while(*pino != 0){
+		getblk((u16)*pino,BLK*(i));
+		ino++;
+		i++;
+	}
 	getc();
+	return 1;
 }
