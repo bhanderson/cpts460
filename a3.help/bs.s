@@ -3,7 +3,7 @@
         OSSEG    =  0x1000
         SSP      =    8192
 	
-        .globl _main,_prints                             ! IMPORT symbols
+        .globl _main,_myprints                             ! IMPORT symbols
         .globl _getc,_putc,_readfd,_setes,_inces,_error  ! EXPORT symbols
 	                                                
         !-------------------------------------------------------
@@ -101,7 +101,7 @@ _inces:                         ! inces() inc ES by 2*0x20
         !------------------------------
 _error:
         push #msg
-        call _prints
+        call _myprints
         
         int  0x19                       ! reboot
 
