@@ -13,7 +13,7 @@ typedef struct proc{
 	int  pid;
 	int  ppid;
 	int  priority;
-	int  status;            /* READY|DEAD, etc */
+	int  status;            /* READY|DEAD|FREE, etc */
 	int  kstack[SSIZE];     // kmode stack of task
 }PROC;
 
@@ -56,7 +56,7 @@ int initialize(){
 	running->status = READY;
 	running->next = NULL;
 	freeList = &proc[1];
-	proc[NPROC-1].next = &proc[1];
+	proc[NPROC-1].next = NULL;
 	readyQueue = NULL;
 	printf("initialization complete\n");
 }
@@ -69,7 +69,7 @@ char *gasp[NPROC]={
 };
 
 int grave(){
-	printf("\n*****************************************\n");
+	printf("*****************************************\n");
 	printf("Task %d %s\n", running->pid,gasp[(running->pid) % 4]);
 	printf("*****************************************\n");
 	running->status = DEAD;
@@ -97,7 +97,7 @@ int body(){
 	while(1){
 		ps();
 		printf("I am Proc %d in body()\n", running->pid);
-		printf("Input a char : [f|s|q] ");
+		printf("Input a char : [f|s|q] \n");
 		c=getc();
 		switch(c){
 			case 'f': kfork();		break;
@@ -118,7 +118,6 @@ main(){
 }
 
 void enqueue(PROC *p, PROC** queue){
-	//printf("added process: %d to queue \n", p->pid);
 	PROC *c, *n;
 	// if the queue is empty or the new process has highest priority in queue
 	if (queue == NULL || p->priority > (*queue)->priority){
@@ -144,6 +143,7 @@ void enqueue(PROC *p, PROC** queue){
 
 PROC *dequeue(PROC **queue){
 	PROC *p = *queue;
+	printf("dequeued proc %d", p->pid);
 	if (*queue != NULL)
 		*queue = (*queue)->next;
 	return p;
@@ -163,7 +163,7 @@ int scheduler(){
 		enqueue(running, &readyQueue);
 
 	running = dequeue(&readyQueue);
-	printf("\n-----------------------------\n");
+	printf("-----------------------------\n");
 	printf("next running proc = %d\n", running->pid);
 	printf("-----------------------------\n");
 }
@@ -182,14 +182,15 @@ int kfork(){
 		printf("ERROR: no free procs\n");
 		return -1;
 	}
-
-	for (i=1; i<10; i++)
-		p->kstack[SSIZE - i] = 0;          // all saved registers = 0
 	p->ppid = running->pid;
 	p->status = READY;
-	p->kstack[SSIZE-1]=(int)body;          // called tswitch() from body
-	p->ksp = &(p->kstack[SSIZE-9]);        // ksp -> kstack top
+	for (i=1; i<10; i++){
+		p->kstack[SSIZE - i] = 0;          // all saved registers = 0
+		p->kstack[SSIZE-1]=(int)body;          // called tswitch() from body
+		p->ksp = &(p->kstack[SSIZE-9]);        // ksp -> kstack top
+	}
 
 	enqueue(p, &readyQueue);
+	//printf("kfork()");
 	return p->pid;
 }
