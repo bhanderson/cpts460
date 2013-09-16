@@ -22,24 +22,9 @@ typedef struct proc{
 PROC proc[NPROC], *running, *readyQueue, *freeList;
 
 int  procSize = sizeof(PROC);
-
-/****************************************************************
-  Initialize the proc's as shown:
-  running ---> proc[0] -> proc[1];
-
-  proc[1] to proc[N-1] form a circular list:
-
-  proc[1] --> proc[2] ... --> proc[NPROC-1] -->
-  ^                                         |
-  |<---------------------------------------<-
-
-  Each proc's kstack contains:
-  retPC, ax, bx, cx, dx, bp, si, di, flag;  all 2 bytes
- *****************************************************************/
-
 int body();
 int kfork();
-
+// setup proc structs and set proc 0 as READY
 int initialize(){
 	int i, j;
 	PROC *p;
@@ -55,7 +40,7 @@ int initialize(){
 	// p[0] gets special stuff
 	running->priority = 0;
 	running->status = READY;
-	running->next = NULL;
+	running->next = &proc[1];
 	freeList = &proc[1];
 	proc[NPROC-1].next = NULL;
 	readyQueue = NULL;
