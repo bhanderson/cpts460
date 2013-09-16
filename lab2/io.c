@@ -72,15 +72,23 @@ int printf(char *fmt, ...)
 		if (*cp=='%') {
 			switch(++*cp){
 				case 'c':
+					putc(*ip);
+					ip+=2;
 					break;
 				case 's':
+					prints(*ip);
+					ip+=2;
 					break;
 				case 'd':
+					printu(*ip);
+					ip+=2;
 					break;
 				case 'l':
+					printl(*ip);
+					ip+=4;
 					break;
 				default:
-					putc(*cp++);
+					putc(cp);
 					break;
 			}
 		}
