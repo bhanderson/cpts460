@@ -43,7 +43,7 @@ int kfork();
 int initialize(){
 	int i, j;
 	PROC *p;
-
+	// initialize all procs as p>0
 	for (i=0; i < NPROC; i++){
 		p = &proc[i];
 		p->next = &proc[i+1];
@@ -52,6 +52,7 @@ int initialize(){
 		p->status = FREE;
 	}
 	running = &proc[0];
+	// p[0] gets special stuff
 	running->priority = 0;
 	running->status = READY;
 	running->next = NULL;
@@ -60,14 +61,14 @@ int initialize(){
 	readyQueue = NULL;
 	printf("initialization complete\n");
 }
-
+// hilarious kcw expressions
 char *gasp[NPROC]={
 	"Oh! You are killing me .......",
 	"Oh! I am dying ...............",
 	"Oh! I am a goner .............",
 	"Bye! Bye! World...............",
 };
-
+// set running proc's status to dead and switch to next proc
 int grave(){
 	printf("*****************************************\n");
 	printf("Task %d %s\n", running->pid,gasp[(running->pid) % 4]);
@@ -76,7 +77,7 @@ int grave(){
 
 	tswitch();   /* journey of no return */
 }
-
+// print processes
 int ps(){
 	PROC *p;
 
@@ -91,23 +92,34 @@ int ps(){
 	}
 	printf("\n");
 }
-
+// print out a queue that is specified
+void printQueue(PROC *queue){
+	PROC *p = queue;
+	while(p != NULL){
+		printf("[%d] -> ", p->pid);
+		p = p->next;
+	}
+	printf("NULL\n");
+}
+// basically main
 int body(){
 	char c;
+	// where the program rests
 	while(1){
 		ps();
 		printf("I am Proc %d in body()\n", running->pid);
-		printf("Input a char : [f|s|q] \n");
+		printf("Input a char : [f|p|s|q] \n");
 		c=getc();
 		switch(c){
 			case 'f': kfork();		break;
 			case 's': tswitch();	break;
+			case 'p': printQueue(running); break;
 			case 'q': grave();		break;
 			default :				break;
 		}
 	}
 }
-
+// basic prints and begin switching and forking
 main(){
 	printf("\nWelcome to the 460 Multitasking System\n");
 	initialize();
@@ -116,7 +128,7 @@ main(){
 	tswitch();
 	printf("P0 resumes: all dead, happy ending\n");
 }
-
+// add a proc to a queue ordered by priority
 void enqueue(PROC *p, PROC** queue){
 	PROC *c, *n;
 	// if the queue is empty or the new process has highest priority in queue
@@ -140,24 +152,15 @@ void enqueue(PROC *p, PROC** queue){
 	p->next = n;
 	return;
 }
-
+// get the top process
 PROC *dequeue(PROC **queue){
 	PROC *p = *queue;
-	printf("dequeued proc %d", p->pid);
+	printf("dequeued proc %d\n", p->pid);
 	if (*queue != NULL)
 		*queue = (*queue)->next;
 	return p;
 }
-
-void printQueue(PROC *queue){
-	PROC *p = queue;
-	while(p != NULL){
-		printf("[%d] -> ", p->pid);
-		p = p->next;
-	}
-	printf("NULL\n");
-}
-
+// queues the running process and dequeues the next one
 int scheduler(){
 	if (running->status == READY)
 		enqueue(running, &readyQueue);
@@ -167,13 +170,13 @@ int scheduler(){
 	printf("next running proc = %d\n", running->pid);
 	printf("-----------------------------\n");
 }
-
+// return a the top fre process or return NULL
 PROC* getproc(){
 	if (freeList != NULL)
 		return dequeue(&freeList);
 	return freeList;
 }
-
+// setup the structs of 9 processes to be populated
 int kfork(){
 	PROC *p = getproc();
 	int i;
