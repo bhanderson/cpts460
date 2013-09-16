@@ -40,7 +40,6 @@ int initialize(){
 	// p[0] gets special stuff
 	running->priority = 0;
 	running->status = READY;
-	running->next = &proc[1];
 	freeList = &proc[1];
 	proc[NPROC-1].next = NULL;
 	readyQueue = NULL;
@@ -65,9 +64,7 @@ int grave(){
 // print processes
 int ps(){
 	PROC *p;
-
 	printf("running = %d\n", running->pid);
-
 	p = running;
 	p = p->next;
 	printf("readyProcs = ");
@@ -161,7 +158,7 @@ PROC* getproc(){
 		return dequeue(&freeList);
 	return freeList;
 }
-// setup the structs of 9 processes to be populated
+// setup the stacks of 9 processes to be populated
 int kfork(){
 	PROC *p = getproc();
 	int i;
