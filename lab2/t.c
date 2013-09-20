@@ -91,6 +91,7 @@ char *gasp[NPROC]={
 	"Oh! I am a goner .............",
 	"Bye! Bye! World...............",
 };
+// wake up a process from sleeping using an event
 void wakeup(int event){
 	int i;
 	PROC *p1 = sleepList;
@@ -106,6 +107,7 @@ void wakeup(int event){
 			p1 = p1->next;
 	}
 }
+// kill a process
 int kexit(int val)
 {
 	int i;
@@ -126,7 +128,7 @@ int kexit(int val)
 	wakeup(&proc[running->ppid]);
 	tswitch();
 }
-
+// sleep a process
 void sleep(PROC* event)
 {
 	running->event = event;
@@ -135,8 +137,7 @@ void sleep(PROC* event)
 
 	tswitch();
 }
-
-
+// make a process wait
 int wait(int *status){
 	int i, count, pid;
 	for (i = 0, count = 0; i < NPROC; i++) {
@@ -149,9 +150,8 @@ int wait(int *status){
 	}
 	for (i = 0; i < NPROC; i++) {
 		if (proc[i].ppid == running->pid && proc[i].status == ZOMBIE) {
-			*status = proc[i].status;
-			proc[i].status = DEAD;
-			// free ZOMBIE child PROC
+			*status = proc[i].exitVal;
+			proc[i].status = FREE;
 			return proc[i].pid;
 		}
 	}
@@ -195,14 +195,6 @@ int body(){
 	int status, pid;
 	// where the program rests
 	while(1){
-/*		printf("running: ");
-		printQueue(running);
-		printf("ready: ");
-		printQueue(readyQueue);
-		printf("free: ");
-		printQueue(freeList);
-		printf("sleep: ");
-		printQueue(sleepList);*/
 		printf("\nProc %d[%d]\n", running->pid, running->ppid);
 		printf("Input a char : [[f]ork|[z]sleep|[p]rint|[k]ill|[s]witch|wake[u]p|[w]ait] \n");
 		c=getc();
@@ -220,7 +212,7 @@ int body(){
 			case 'p': printQueue(running);
 					  printf("---------------------------------------------------------------------------\n");
 					  break;
-			case 'q': kexit();
+			case 'k': kexit();
 					  printf("---------------------------------------------------------------------------\n");
 					  break;
 			case 's': tswitch();
