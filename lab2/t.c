@@ -112,9 +112,11 @@ int kexit(int val)
 {
 	int i;
 	if (running->pid == proc[1].pid) {
-		for (i = 0; i < NPROC; i++) {
-			if (proc[i].ppid == running->pid && proc[i].status != FREE)
+		for (i = 2; i < NPROC; i++) {
+			if (proc[i].status != FREE && proc[i].ppid == proc[1].pid){
+				printf("proc %d not free\n", i);
 				return;
+			}
 		}
 	}
 	running->status = ZOMBIE;
