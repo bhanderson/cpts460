@@ -111,9 +111,11 @@ void wakeup(int event){
 int kexit(int val)
 {
 	int i;
-	if (running->pid == 1){
-		printf("Cannot kill pid 1\n");
-		return 1;
+	if (running->pid == proc[1].pid) {
+		for (i = 0; i < NPROC; i++) {
+			if (proc[i].ppid == running->pid && proc[i].status != FREE)
+				return;
+		}
 	}
 	running->status = ZOMBIE;
 	running->exitVal = val;
@@ -147,16 +149,18 @@ int wait(int *status){
 	if (count == 0){
 		printf("no children to wait on\n");
 		return -1;
-	}
-	for (i = 0; i < NPROC; i++) {
-		if (proc[i].ppid == running->pid && proc[i].status == ZOMBIE) {
-			*status = proc[i].exitVal;
-			proc[i].status = FREE;
-			return proc[i].pid;
+	}while(1){
+		for (i = 0; i < NPROC; i++) {
+			if (proc[i].ppid == running->pid && proc[i].status == ZOMBIE) {
+				*status = proc[i].exitVal;
+				proc[i].status = FREE;
+				return proc[i].pid;
+			}
 		}
+		sleep(running);
 	}
-	sleep(running);
 }
+
 // set running proc's status to dead and switch to next proc
 int grave(){
 	printf("*****************************************\n");
@@ -179,6 +183,7 @@ int ps(){
 	}
 	printf("\n");
 }
+
 // print out a queue that is specified
 void printQueue(PROC *queue){
 	PROC *p = queue;
@@ -189,50 +194,56 @@ void printQueue(PROC *queue){
 	printf("NULL\n");
 	printf("\n");
 }
+
 // basically main
 int body(){
 	char c;
 	int status, pid;
 	// where the program rests
 	while(1){
+		ps();
 		printf("\nProc %d[%d]\n", running->pid, running->ppid);
 		printf("Input a char : [[f]ork|[z]sleep|[p]rint|[k]ill|[s]witch|wake[u]p|[w]ait] \n");
 		c=getc();
 		switch(c){
 			case 'f': kfork();
-					  printf("----------------------------------------------------------------------------\n");
+					  printf("\n");
 					  break;
 			case 'z': printf("event: ");
 					  c = getc();
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("\n");
 					  status = c - '0';
 					  sleep(status);
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("\n");
 					  break;
 			case 'p': printQueue(running);
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("\n");
 					  break;
-			case 'k': kexit();
-					  printf("---------------------------------------------------------------------------\n");
+			case 'k': printf("input exitVal: ");
+					  c = getc();
+					  c = c - '0';
+					  printf("%c\n", c);
+					  kexit((int)c);
+					  printf("\n");
 					  break;
 			case 's': tswitch();
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("\n");
 					  break;
 			case 'u': printf("event: ");
 					  c = getc();
 					  printf("\n");
 					  status = c - '0';
 					  wakeup(status);
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("-----------\n");
 					  break;
 			case 'w': pid = wait(&status);
 					  if (pid < 1)
 						  printf("ERR NO CHILDREN\n");
 					  else
 						  printf("pid=%d exitVal=%d\n",pid,status);
-					  printf("---------------------------------------------------------------------------\n");
+					  printf("-----------\n");
 					  break;
-			default : printf("---------------------------------------------------------------------------\n");
+			default : printf("-----------\n");
 					  break;
 		}
 	}
@@ -252,9 +263,9 @@ int scheduler(){
 		enqueue(running, &readyQueue);
 
 	running = dequeue(&readyQueue);
-	printf("-----------------------------\n");
+	printf("------------\n");
 	printf("next running proc = %d\n", running->pid);
-	printf("-----------------------------\n");
+	printf("------------\n");
 }
 // return a the top fre process or return NULL
 PROC* getproc(){
