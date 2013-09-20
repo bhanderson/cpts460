@@ -5,25 +5,61 @@
 #define DEAD		0              /* proc status     */
 #define READY		1
 #define FREE		2
+#define ZOMBIE		3
+#define SLEEP		4
 #define NULL		0
 
 typedef struct proc{
 	struct proc *next;
+	struct PROC *event;
 	int  ksp;               /* saved sp; offset = 2 */
 	int  pid;
 	int  ppid;
 	int  priority;
 	int  status;            /* READY|DEAD|FREE, etc */
+	int  exitVal;
 	int  kstack[SSIZE];     // kmode stack of task
 }PROC;
 
 //#include "io.c"  /* <===== use YOUR OWN io.c with printf() ****/
 
-PROC proc[NPROC], *running, *readyQueue, *freeList;
+PROC proc[NPROC], *running, *readyQueue, *freeList, *sleepList;
 
 int  procSize = sizeof(PROC);
 int body();
 int kfork();
+// add a proc to a queue ordered by priority
+void enqueue(PROC *p, PROC** queue){
+	PROC *c, *n;
+	// if the queue is empty or the new process has highest priority in queue
+	if (queue == NULL || p->priority > (*queue)->priority){
+		PROC* temp = *queue;
+		*queue = p;
+		p->next = temp;
+		return;
+	}
+
+	// go through the queue until the priority is <= the next
+	c = (*queue);
+	n = c->next;
+
+	while(c != NULL && p->priority <= n->priority){
+		c = n;
+		n = n->next;
+	}
+	// then insert
+	c->next = p;
+	p->next = n;
+	return;
+}
+// get the top process
+PROC *dequeue(PROC **queue){
+	PROC *p = *queue;
+	printf("dequeued proc %d\n", p->pid);
+	if (*queue != NULL)
+		*queue = (*queue)->next;
+	return p;
+}
 // setup proc structs and set proc 0 as READY
 int initialize(){
 	int i, j;
@@ -52,6 +88,63 @@ char *gasp[NPROC]={
 	"Oh! I am a goner .............",
 	"Bye! Bye! World...............",
 };
+void wakeup(PROC* event){
+	int i;
+	PROC *p1 = sleepList;
+	PROC *p2;
+	if (sleepList == NULL)
+		return;
+	while (p1 != NULL) {
+		p2 = p1;
+		p1 = dequeue(&p1);
+		p2->status = READY;
+		enqueue(p1, &readyQueue);
+	}
+}
+void kexit(int val)
+{
+	int i;
+	running->status = ZOMBIE;
+	running->exitVal = val;
+	for (i = 0; i < NPROC; i++) {
+		if (proc[i].ppid == running->pid) {
+			proc[i].ppid == proc[1].pid;
+		}
+	}
+	wakeup(&proc[running->ppid]);
+	tswitch();
+}
+
+void sleep(PROC* event)
+{
+	running->event = event;
+	running->status = SLEEP;
+	enqueue(running, &sleepList);
+
+	tswitch();
+}
+
+
+int wait(int *status){
+	int i, count, pid;
+	for (i = 0; i < NPROC; i++) {
+		if(proc[i].ppid == running->pid)
+			count++;
+	}
+	if (count == 0)
+		return -1;
+	while(1){
+		for (i = 0; i < NPROC; i++) {
+			if (proc[i].ppid == running->pid && proc[i].status == ZOMBIE) {
+				*status = proc[i].status;
+				pid = proc[i].pid;
+				// free ZOMBIE child PROC
+				return pid;
+			}
+		}
+		sleep(running);
+	}
+}
 // set running proc's status to dead and switch to next proc
 int grave(){
 	printf("*****************************************\n");
@@ -86,6 +179,7 @@ void printQueue(PROC *queue){
 // basically main
 int body(){
 	char c;
+	int status, pid;
 	// where the program rests
 	while(1){
 		ps();
@@ -97,6 +191,12 @@ int body(){
 			case 's': tswitch();	break;
 			case 'p': printQueue(running); break;
 			case 'q': grave();		break;
+			case 'w': pid = wait(&status);
+					  if (pid < 1)
+						  printf("ERR NO CHILDREN\n");
+					  else
+						  printf("pid=%d exitVal=%d\n",pid,status);
+					  break;
 			default :				break;
 		}
 	}
@@ -109,38 +209,6 @@ main(){
 	printf("P0 switch to P1\n");
 	tswitch();
 	printf("P0 resumes: all dead, happy ending\n");
-}
-// add a proc to a queue ordered by priority
-void enqueue(PROC *p, PROC** queue){
-	PROC *c, *n;
-	// if the queue is empty or the new process has highest priority in queue
-	if (queue == NULL || p->priority > (*queue)->priority){
-		PROC* temp = *queue;
-		*queue = p;
-		p->next = temp;
-		return;
-	}
-
-	// go through the queue until the priority is <= the next
-	c = (*queue);
-	n = c->next;
-
-	while(c != NULL && p->priority <= n->priority){
-		c = n;
-		n = n->next;
-	}
-	// then insert
-	c->next = p;
-	p->next = n;
-	return;
-}
-// get the top process
-PROC *dequeue(PROC **queue){
-	PROC *p = *queue;
-	printf("dequeued proc %d\n", p->pid);
-	if (*queue != NULL)
-		*queue = (*queue)->next;
-	return p;
 }
 // queues the running process and dequeues the next one
 int scheduler(){
