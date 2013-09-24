@@ -126,7 +126,7 @@ int kexit(int val)
 	printf("*****************************************\n");
 	for (i = 0; i < NPROC; i++) {
 		if (proc[i].ppid == running->pid) {
-			proc[i].ppid == proc[1].pid;
+			proc[i].ppid = proc[1].pid;
 		}
 	}
 	wakeup(&proc[running->ppid]);
