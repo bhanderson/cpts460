@@ -1,10 +1,22 @@
 #include "type.h"
+int addSleep(PROC *p){
+	PROC *temp;
+	if (sleepList == NULL)
+		sleepList = p;
+	else{
+		temp = sleepList;
+		while(temp->next){
+			temp = temp->next;
+		}
+		temp->next = p;
+	}
+	p->next = 0;
+}
 int ksleep(event) int event;
 {
 	running->event = event;
 	running->status = SLEEP;
-	enqueue(running, &sleepList);
-
+	addSleep(running);
 	tswitch();
 }
 
@@ -22,16 +34,16 @@ int kwakeup(event) int event;
 				sleepList = curr->next;
 				curr->event=0;
 				curr->status = READY;
-				enqueue(p, &readyQueue);
+				enqueue(curr, &readyQueue);
 				printf("woke %d\n", curr->pid);
-				p = q = sleepList;
+				past = curr = sleepList;
 				continue;
 			}
 			// if not the first item in the list
 			past->next = curr->next;
 			curr->event = 0;
 			curr->status = READY;
-			enqueue(p, &readyQueue);
+			enqueue(curr, &readyQueue);
 			printf("woke %d\n", curr->pid);
 			curr = past->next;
 		}
