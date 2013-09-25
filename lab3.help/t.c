@@ -1,5 +1,4 @@
 #include "type.h"
-#include "queue.c"
 PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
 int procSize = sizeof(PROC);
 int nproc = 0;
