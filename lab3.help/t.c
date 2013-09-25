@@ -3,6 +3,7 @@
 PROC proc[NPROC], *running, *freeList, *readyQueue, *sleepList;
 int procSize = sizeof(PROC);
 int nproc = 0;
+int int80h();
 
 int body();
 char *pname[]={"P0", "P1", "P2", "P3",  "P4", "P5","P6", "P7", "P8" };
@@ -10,75 +11,6 @@ char *pname[]={"P0", "P1", "P2", "P3",  "P4", "P5","P6", "P7", "P8" };
 #include "wait.c"
 #include "int.c"
 
-int do_tswitch(){
-	printf("PID %d switching", running->pid);
-	tswitch();
-}
-
-int do_kfork(){
-	int i;
-	i = kfork();
-	if (i < 0)
-		printf("fork failed\n");
-	else
-		printf("parent return from fork, child=%d\n", i);
-}
-
-int do_wait(int *ptr){
-	int val, pid;
-
-	pid = wait(&val);
-
-	if (ptr == 0){
-		*ptr = val;
-	} else {
-		put_word(val, running->uss, ptr);
-	}
-	printf("waiting");
-	return pid;
-}
-
-
-
-int do_ps(){
-	int i;
-	printf("================================================\n");
-	printf("\tname\t\tstatus\tpid\tppid\n");
-	printf("------------------------------------------------\n");
-	for (i = 0; i < NPROC; i++) {
-		printf("\t%s\t\t",proc[i].name);
-		switch(proc[i].status){
-			case FREE:		printf("FREE\t"); break;
-			case READY:		printf("READY\t"); break;
-			case RUNNING:	printf("RUNNING\t"); break;
-			case STOPPED:	printf("STOPPED\t"); break;
-			case SLEEP:		printf("SLEEP\n"); break;
-			case ZOMBIE:	printf("ZOMBIE\n"); break;
-		}
-		printf("%d\t",proc[i].pid);
-		printf("%d\n",proc[i].ppid);
-	}
-	printf("------------------------------------------------\n");
-	return 0;
-}
-
-int kmode(){
-	body();
-}
-
-int chname(char *c){
-	int i;
-	printf("name:");
-	for (i = 0; i < 32; i++) {
-		running->name[i] = get_byte(running->uss, c[i]);
-		if (running->name[i] == '\0')
-			break;
-		else
-			printf("%c", running->name[i]);
-	}
-	printf("\n");
-	running->name[31] = '\0';
-}
 
 int init(){
 	PROC *p; int i;
@@ -106,7 +38,119 @@ int init(){
 	printf("done\n");
 }
 
-int int80h();
+int kfork(char *filename){
+	PROC *p;
+	int  i, child;
+	u16  segment;
+
+	/*** get a PROC for child process: **/
+	if ( (p = get_proc(&freeList)) == 0){
+		printf("no more proc\n");
+		return(-1);
+	}
+
+	/* initialize the new proc and its stack*/
+	p->status = READY;
+	p->ppid = running->pid;
+	p->parent = running;
+	p->priority  = 1;                 // all of the same priority 1
+
+	for (i = 1; i < 10; i++) {
+		p->kstack[SSIZE -i] = 0;
+	}
+	p->kstack[SSIZE -1] =(int)body;
+	p->ksp = &(p->kstack[SSIZE-9]);
+	enqueue(&readyQueue, p);
+	nproc++;
+	// make Umode image by loading /bin/u1 into segment
+	segment = (p->pid + 1)*0x1000;
+	load(filename, segment);
+	printf("loaded %s at %u\n",filename, segment);
+	for (i = 1; i < 13; i++) {
+		switch(i){
+			case 1:		child = 0x0200;		break;
+			case 2:
+			case 11:
+			case 12:	child = segment;	break;
+			default:	child = 0;			break;
+		}
+		put_word(child, segment, 0x1000-i*2);
+	}
+	p->uss = segment;
+	p->usp = 0x1000 - 12*2;
+
+	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
+	return(p->pid);
+}
+
+int do_tswitch(){
+	printf("PID %d switching", running->pid);
+	tswitch();
+}
+
+int do_kfork(){
+	int i;
+	i = kfork("bin/u1");
+	if (i < 0)
+		printf("fork failed\n");
+	else
+		printf("parent return from fork, child=%d\n", i);
+}
+
+int do_wait(int *ptr){
+	int val, pid;
+
+	pid = wait(&val);
+
+	if (ptr == 0){
+		*ptr = val;
+	} else {
+		put_word(val, running->uss, ptr);
+	}
+	printf("waiting");
+	return pid;
+}
+
+
+
+int do_ps(){
+	int i;
+	printf("==============================================\n");
+	printf("\tname\t\t\tstatus\t\tpid\t\tppid\n");
+	printf("----------------------------------------------\n");
+	for (i = 0; i < NPROC; i++) {
+		printf("\t%s\t\t\t\t\t",proc[i].name);
+		switch(proc[i].status){
+			case FREE:		printf("FREE     "); break;
+			case READY:		printf("READY    "); break;
+			case RUNNING:	printf("RUNNING  "); break;
+			case STOPPED:	printf("STOPPED  "); break;
+			case SLEEP:		printf("SLEEP    "); break;
+			case ZOMBIE:	printf("ZOMBIE   "); break;
+		}
+		printf("%d\t\t\t",proc[i].pid);
+		printf("%d\n",proc[i].ppid);
+	}
+	printf("----------------------------------------------\n");
+	return 0;
+}
+
+int kmode(){
+	body();
+}
+
+int chname(char *c){
+	int i;
+	for (i = 0; i < 32; i++) {
+		running->name[i] = get_byte(running->uss, c+i);
+		if (running->name[i] == '\0')
+			break;
+		else
+			printf("%c", running->name[i]);
+	}
+	printf("\n");
+	running->name[31] = '\0';
+}
 
 int set_vec(u16 vector, u16 handler){
 	// put_word(word, segment, offset) in mtxlib
@@ -123,17 +167,16 @@ main(){
 
 	while(1){
 		printf("P0 running\n");
-		printf("%d", readyQueue);
 		while(!readyQueue);
 		printf("P0 switch process\n");
 		tswitch();         // P0 switch to run P1
-		printf("\n1\n");
 	}
 }
 
 int scheduler(){
 	if (running->status == READY)
-		enqueue(running, &readyQueue);
+		enqueue(&readyQueue, running);
+	//enqueue(running, &readyQueue);
 	running = dequeue(&readyQueue);
 }
 
@@ -160,49 +203,4 @@ int body(){
 		}
 	}
 }
-
-int kfork(char *filename){
-	PROC *p;
-	int  i, child;
-	u16  segment;
-
-	/*** get a PROC for child process: **/
-	if ( (p = get_proc(&freeList)) == 0){
-		printf("no more proc\n");
-		return(-1);
-	}
-
-	/* initialize the new proc and its stack*/
-	p->status = READY;
-	p->ppid = running->pid;
-	p->parent = running;
-	p->priority  = 1;                 // all of the same priority 1
-
-	for (i = 1; i < 10; i++) {
-		p->kstack[SSIZE -i] = 0;
-	}
-	p->kstack[SSIZE -1] =(int)body;
-	p->ksp = &(p->kstack[SSIZE-9]);
-	enqueue(p, &readyQueue);
-
-	// make Umode image by loading /bin/u1 into segment
-	segment = (p->pid + 1)*0x1000;
-	load(filename, segment);
-	for (i = 1; i < 13; i++) {
-		switch(i){
-			case 1:		child = 0x0200;		break;
-			case 2:
-			case 11:
-			case 12:	child = segment;	break;
-			default:	child = 0;			break;
-		}
-		put_word(child, segment, 0x1000-i*2);
-	}
-	p->uss = segment;
-	p->usp = 0x1000 - 12*2;
-
-	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
-	return(p->pid);
-}
-
 

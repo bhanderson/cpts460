@@ -1,8 +1,8 @@
 int sleep(int event){
 	running->event = event;
 	running->status = SLEEP;
-	enqueue(running, &sleepList);
-	printf("in sleep\n");
+	enqueue(&sleepList, running);
+	//enqueue(running, &sleepList);
 	tswitch();
 }
 
@@ -14,7 +14,7 @@ int wait(int *val){
 		for (i = 0; i < NPROC; i++) {
 			p = &proc[i];
 			if (p->ppid == running->pid && p->status != FREE){
-				child ++;
+				child=1;
 				if (p->status == ZOMBIE){
 					p->status = FREE;
 					*val = p->exitCode;
@@ -29,7 +29,6 @@ int wait(int *val){
 		// if children sleep on self
 		sleep(running);
 	}
-	printf("in wait\n");
 }
 
 int wakeup(int event){
@@ -43,20 +42,19 @@ int wakeup(int event){
 			t->next = p->next;
 			if (p == sleepList)
 				sleepList = p->next;
-			enqueue(p, &readyQueue);
+			enqueue(&readyQueue,p);
 			return;
 		} else{
 			t = p;
 			p = p->next;
 		}
 	}
-	printf("in wakeup\n");
 }
 int do_exit(int *val){
 	int i = 0;
 	if (running->pid == proc[1].pid)
 		for (i = 2; i < NPROC; i++) {
-			if (proc[i].ppid == proc[1].pid && proc[i].status != FREE){
+			if (proc[i].status == READY){
 				printf("proc %d not free\n", i);
 				return -1;
 			}

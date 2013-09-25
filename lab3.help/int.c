@@ -23,7 +23,7 @@ int kcinth(){
 	c = get_word(segment, offset + 2*PC);
 	d = get_word(segment, offset + 2*PD);
 
-	printf("proc%d syscall a=%d b=%d c=%d d=%d\n", running->pid, a,b,c,d);
+	//printf("proc%d syscall a=%d b=%d c=%d d=%d\n", running->pid, a,b,c,d);
 
 	switch(a){
 		case 0 : r = running->pid;     break;
