@@ -61,7 +61,6 @@ int kfork(char *filename){
 	}
 	p->kstack[SSIZE -1] =(int)body;
 	p->ksp = &(p->kstack[SSIZE-9]);
-	enqueue(&readyQueue, p);
 	nproc++;
 	// make Umode image by loading /bin/u1 into segment
 	segment = (p->pid + 1)*0x1000;
@@ -81,15 +80,16 @@ int kfork(char *filename){
 	p->usp = 0x1000 - 12*2;
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
+	enqueue(&readyQueue, p);
 	return(p->pid);
 }
 
 int copy_image(u16 segment){
-	int i,j;
-	j = (running->pid + 1) * 0x1000;
-	for (i = 0; i < 32768; i++) {
-		put_word(get_word(j, i), segment, i);
+	int i;
+	for(i=0;i<0x1000;i+=2){
+		put_word(get_word(running->uss, i),segment, i);
 	}
+	return 1;
 }
 
 int ufork()
@@ -104,28 +104,48 @@ int ufork()
 		return(-1);
 	}
 
-	/* initialize the new proc and its stack*/
+	/* set procs values to running and ready so we can use it */
 	p->status = READY;
+	p->next = NULL;
 	p->ppid = running->pid;
 	p->parent = running;
-	p->priority = running->priority;                 // all of the same priority 1
+	p->priority = running->priority;
 
+	/* zero out kstack registers*/
 	for (i = 1; i < 10; i++) {
 		p->kstack[SSIZE -i] = 0;
 	}
+	// set address to resume to
 	p->kstack[SSIZE -1] =(int)goUmode;
 	p->ksp = &(p->kstack[SSIZE-9]);
-	enqueue(&readyQueue, p);
-	nproc++;
 
 	segment = (p->pid + 1)*0x1000;
 	copy_image(segment);
-	printf("loaded %u\n", segment);
+	printf("loaded at %u\n", segment);
+	for (i = 1; i < 13; i++) {
+		child = 0x1000 - i*2;
+		switch(i){
+			case 1: put_word(segment, segment, child); break;
+			case 2: put_word(segment, segment, child); break;
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10: put_word(0,segment, child); break;
+			case 11:
+			case 12: put_word(segment, segment, child); break;
+		}
+	}
 	p->uss = segment;
-	p->usp = running->usp;
-	put_word(0, segment, running->usp + 8*2);
+	p->usp = child;
+	put_word(0, segment, p->usp + 8*2);
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
+	enqueue(&readyQueue, p);
+	nproc++;
 	return(p->pid);
 }
 
@@ -157,6 +177,34 @@ int do_wait(int *ptr){
 	return pid;
 }
 
+int exec(char *filename){
+	// basically do the same initialization as kfork but with different path
+	char name[128];
+	int i, child;
+	u16 segment = (running->pid +1) * 0x1000;
+	for (i = 0; i < 128; i++) {
+		name[i] = get_byte(segment, filename + i);
+		if (name[i] == '\0')
+			break;
+	}
+	load(name, segment);
+	for (i = 1; i < 13; i++) {
+		switch(i){
+			case 1:		child = 0x0200;		break;
+			case 2:
+			case 10: 	child = 0;			break;
+			case 11:
+			case 12:	child = segment;	break;
+			default:	child = 0;			break;
+		}
+		put_word(child, segment, 0x1000-i*2);
+	}
+	printf("\n1\n");
+	running->uss = segment;
+	running->usp = 0x1000-24;
+	put_word(0, segment, running->usp + 8*2);
+	return 1;
+}
 
 
 int do_ps(){

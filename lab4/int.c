@@ -34,6 +34,7 @@ int kcinth(){
 		case 5 : r = do_wait(b);       break;
 		case 6 : r = do_exit(b);       break;
 		case 7 : r = ufork();          break;
+		case 8 : exec(b);              break;
 
 		case 90: r =  getc();          break;
 		case 91: r =  putc(b);         break;

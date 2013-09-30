@@ -10,5 +10,6 @@ umount /mnt
 rm *.o mtx
 
 (cd USER; ./mku u1)
+(cd USER; ./mku u2)
 
 echo done

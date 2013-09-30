@@ -1,12 +1,12 @@
 // ucode.c file
 
-char *cmd[]={"getpid", "ps", "chname", "kmode", "switch", "wait", "exit", "fork", 0};
+char *cmd[]={"getpid", "ps", "chname", "kmode", "switch", "wait", "exit", "fork", "exec", 0};
 
 int show_menu()
 {
-	printf("***************** Menu *******************\n");
-	printf("*  ps  chname  kmode  switch  wait  exit *\n");
-	printf("******************************************\n");
+	printf("************************ Menu ************************\n");
+	printf("*  ps  chname  kmode  switch  wait  exit  fork exec  *\n");
+	printf("******************************************************\n");
 }
 
 int find_cmd(name) char *name;
@@ -22,7 +22,12 @@ int find_cmd(name) char *name;
 	}
 	return(-1);
 }
-
+int exec(){
+	char c[128];
+	printf("enter filename: ");
+	gets(c);
+	return syscall(8, c, 0);
+}
 int fork(){
 	return syscall(7, 0, 0);
 }
