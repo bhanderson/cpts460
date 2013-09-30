@@ -191,9 +191,9 @@ int exec(char *filename){
 		switch(i){
 			case 1:		child = 0x0200;		break;
 			case 2:
-			case 10: 	child = 0;			break;
 			case 11:
 			case 12:	child = segment;	break;
+			case 10:	put_word(0, segment, 0x1000-i*2); continue;
 			default:	child = 0;			break;
 		}
 		put_word(child, segment, 0x1000-i*2);
