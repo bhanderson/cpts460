@@ -92,8 +92,7 @@ int copy_image(u16 segment){
 	return 1;
 }
 
-int ufork()
-{
+int ufork(){
 	PROC *p;
 	int  i, child;
 	u16  segment;
@@ -103,7 +102,7 @@ int ufork()
 		printf("no more proc\n");
 		return(-1);
 	}
-
+	printf("ufork\n");
 	/* set procs values to running and ready so we can use it */
 	p->status = READY;
 	p->next = NULL;
@@ -140,7 +139,7 @@ int ufork()
 		}
 	}
 	p->uss = segment;
-	p->usp = child;
+	p->usp = 0x1000 - 24;
 	put_word(0, segment, p->usp + 8*2);
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
@@ -199,7 +198,6 @@ int exec(char *filename){
 		}
 		put_word(child, segment, 0x1000-i*2);
 	}
-	printf("\n1\n");
 	running->uss = segment;
 	running->usp = 0x1000-24;
 	put_word(0, segment, running->usp + 8*2);
