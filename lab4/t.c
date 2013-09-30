@@ -55,7 +55,7 @@ int kfork(char *filename){
 	p->ppid = running->pid;
 	p->parent = running;
 	p->priority = 1;                 // all of the same priority 1
-
+	// clear kstack
 	for (i = 1; i < 10; i++) {
 		p->kstack[SSIZE -i] = 0;
 	}
@@ -83,7 +83,7 @@ int kfork(char *filename){
 	enqueue(&readyQueue, p);
 	return(p->pid);
 }
-
+// copy runnings uss to segment
 int copy_image(u16 segment){
 	int i;
 	for(i=0;i<0x1000;i+=2){
@@ -118,9 +118,12 @@ int ufork(){
 	p->kstack[SSIZE -1] =(int)goUmode;
 	p->ksp = &(p->kstack[SSIZE-9]);
 
+	// set segment to processes data position
 	segment = (p->pid + 1)*0x1000;
+	// copy the segment
 	copy_image(segment);
 	printf("loaded at %u\n", segment);
+	// clean the registers and set flag and uCs and uDs to runnings values
 	for (i = 1; i < 13; i++) {
 		child = 0x1000 - i*2;
 		switch(i){
@@ -138,6 +141,7 @@ int ufork(){
 			case 12: put_word(segment, segment, child); break;
 		}
 	}
+	// same as kfork
 	p->uss = segment;
 	p->usp = 0x1000 - 24;
 	put_word(0, segment, p->usp + 8*2);
@@ -147,12 +151,12 @@ int ufork(){
 	nproc++;
 	return(p->pid);
 }
-
+// execute switch and print what proc is switching
 int do_tswitch(){
 	printf("PID %d switching", running->pid);
 	tswitch();
 }
-
+// execute kfork and check return
 int do_kfork(){
 	int i;
 	i = kfork("bin/u1");
@@ -162,11 +166,10 @@ int do_kfork(){
 		printf("parent return from fork, child=%d\n", i);
 }
 
+// execute wait and check if success
 int do_wait(int *ptr){
 	int val, pid;
-
 	pid = wait(&val);
-
 	if (ptr == 0){
 		*ptr = val;
 	} else {
@@ -181,12 +184,15 @@ int exec(char *filename){
 	char name[128];
 	int i, child;
 	u16 segment = (running->pid +1) * 0x1000;
+	// get the filename from umode
 	for (i = 0; i < 128; i++) {
 		name[i] = get_byte(segment, filename + i);
 		if (name[i] == '\0')
 			break;
 	}
+	// load the file
 	load(name, segment);
+	// clear registers except flag, uDS uES and uCS
 	for (i = 1; i < 13; i++) {
 		switch(i){
 			case 1:		child = 0x0200;		break;
@@ -198,13 +204,14 @@ int exec(char *filename){
 		}
 		put_word(child, segment, 0x1000-i*2);
 	}
+	// set uss to file position and set usp ustack top position
 	running->uss = segment;
 	running->usp = 0x1000-24;
 	put_word(0, segment, running->usp + 8*2);
 	return 1;
 }
 
-
+// print out all the processes
 int do_ps(){
 	int i;
 	printf("==============================================\n");
@@ -226,13 +233,15 @@ int do_ps(){
 	printf("----------------------------------------------\n");
 	return 0;
 }
-
+// run the kernel mode menu function
 int kmode(){
 	body();
 }
 
+// change the name of a process
 int chname(char *c){
 	int i;
+	// get the name from umode
 	for (i = 0; i < 32; i++) {
 		running->name[i] = get_byte(running->uss, c+i);
 		if (running->name[i] == '\0')
@@ -244,6 +253,7 @@ int chname(char *c){
 	running->name[31] = '\0';
 }
 
+// set the interrupt vector
 int set_vec(u16 vector, u16 handler){
 	// put_word(word, segment, offset) in mtxlib
 	put_word(handler, 0, vector<<2);
