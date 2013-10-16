@@ -1,6 +1,6 @@
 show_pipe(PIPE *p)
 {
-	printf("------------ PIPE CONTENETS ------------\n");
+	printf("------------ PIPE CONTENTS ------------\n");
 	// print pipe information
 	printf("nreader=%d\tnwriter=%d\tdata=%d\troom=%d\ncontents=%s",
 			p->nreader, p->nwriter, p->data, p->room, p->buf);
@@ -75,7 +75,7 @@ int write_pipe(int fd, char *buf, int n)
 		if (!p->nreader)
 			do_exit(BROKEN_PIPE);
 		while(p->room && n){
-			put_word(p->buf[ (p->tail++ % PSIZE) ], buf+r);
+			put_word(p->buf[ (p->tail++ % PSIZE) ], running->uss,  buf+r);
 			r++; p->data++; p->room--; n--;
 		}
 		wakeup(&p->data);  // wakeup all readers, if any.
