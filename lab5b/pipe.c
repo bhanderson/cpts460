@@ -16,16 +16,81 @@ int pfd()
 int read_pipe(int fd, char *buf, int n)
 {
 	// your code for read_pipe()
+	int r = 0;
+	if (n<=0) return 0;
+	if (running->fd[fd]==0) return -1;
+	PIPE *p = running->fd[fd]->pipe;
+	char *data = p->buf;
+	while(n){
+		while(data){
+			data[r] = buf[r];
+			n--; r++; p->data--; p->room++;
+			if (n==0) break;
+		}
+		if (n==0 || r){ // has data
+			wakeup(&p->room);
+			return r;
+		}
+		// pipe has no data
+		if (p->nwriter){
+			wakeup(&p->room);
+			sleep(&p->data);
+			continue;
+		}
+		// pipe has no writer and no data
+		return 0;
+	}
 }
 
 int write_pipe(int fd, char *buf, int n)
 {
 	// your code for write_pipe()
+	int r = 0;
+	if (n<=0) return 0;
+	if (running->fd[fd]==0) return -1;
+	PIPE *p = running->fd[fd]->pipe;
+	char *data = p->buf;
+	while (n){
+		if (!p->nreader)
+			kexit(BROKEN_PIPE);
+		while(p->room && n){
+			p->buf[r] = buf[r];
+			r++; p->data++; p->room--; n--;
+		}
+		wakeup(&p->data);  // wakeup all readers, if any.
+		if (n==0) return r; // finished writing n bytes
+		// still has data to write but pipe has no room
+		sleep(&p->room); // sleep for room
+	}
+
 }
 
 int kpipe(int pd[2])
 {
 	// create a pipe; fill pd[0] pd[1] (in USER mode!!!) with descriptors
+	PIPE p;
+	OFT readOFT, writeOFT;
+	int i;
+	p.head = p.tail = p.data = 0;
+	p.room = PSIZE;
+	p.nreaders = p.nwriters = 1;
+	readOFT.mode = READ_PIPE;
+	writeOFT.mode = WRITE_PIPE;
+	read_OFT.refCount = write_OFT.refCount = 1;
+	read_OFT.pipe_ptr = write_OFT.pipe_ptr = &p;
+	for (i = 0; i < NFD; i+2) {
+		if(running->fd[i] == 0){
+			running->fd[i] = &readOFT;
+			running->fd[i+1] = &writeOFT;
+			break;
+		}
+	}
+	if(running->fd[i]==0)
+		return -1;
+
+	pd[0] = i;
+	pd[1] = i+1;
+	return 0;
 }
 
 int close_pipe(int fd)

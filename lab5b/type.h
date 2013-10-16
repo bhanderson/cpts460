@@ -21,34 +21,34 @@ typedef unsigned long  u32;
 #define NFD       10
 
 typedef struct Oft{
-  int   mode;
-  int   refCount;
-  struct pipe *pipe_ptr;
+	int   mode;
+	int   refCount;
+	struct pipe *pipe_ptr;
 } OFT;
 
 #define PSIZE 10
 #define NPIPE 10
 
 typedef struct pipe{
-  char  buf[PSIZE];
-  int   head, tail, data, room;
-  int   nreader, nwriter;
-  int   busy;
+	char  buf[PSIZE];
+	int   head, tail, data, room;
+	int   nreader, nwriter;
+	int   busy;
 }PIPE;
 
 typedef struct proc{
-    struct proc *next;
-    int    *ksp;
-    int    uss, usp;
-    int    pid;                // add pid for identify the proc
-    int    status;             // status = FREE|READY|RUNNING|SLEEP|ZOMBIE    
-    int    ppid;               // parent pid
-    struct proc *parent;
-    int    priority;
-    int    event;
-    int    exitCode;
-    char   name[32];
+	struct proc *next;
+	int    *ksp;
+	int    uss, usp;
+	int    pid;                // add pid for identify the proc
+	int    status;             // status = FREE|READY|RUNNING|SLEEP|ZOMBIE
+	int    ppid;               // parent pid
+	struct proc *parent;
+	int    priority;
+	int    event;
+	int    exitCode;
+	char   name[32];
 
-    OFT    *fd[NFD];    
-    int    kstack[SSIZE];      // per proc stack area
+	OFT    *fd[NFD];
+	int    kstack[SSIZE];      // per proc stack area
 }PROC;

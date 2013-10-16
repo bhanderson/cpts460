@@ -100,6 +100,9 @@ int do_exit(int *val){
 	}
 	running->exitCode = val;
 	running->status = ZOMBIE;
+	for (i = 0; i < NFD; i++) {
+		close_pipe(i);
+	}
 
 	wakeup(&proc[running->ppid]);
 	tswitch();

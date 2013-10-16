@@ -61,5 +61,35 @@ extern int loader();
 int exec(char *filename)
 {
 	// your exec function
+	// basically do the same initialization as kfork but with different path
+	char name[128];
+	int i, child;
+	u16 segment = (running->pid +1) * 0x1000;
+	// get the filename from umode
+	for (i = 0; i < 128; i++) {
+		name[i] = get_byte(segment, filename + i);
+		if (name[i] == '\0')
+			break;
+	}
+	// load the file
+	load(name, segment);
+	// clear registers except flag, uDS uES and uCS
+	for (i = 1; i < 13; i++) {
+		switch(i){
+			case 1:		child = 0x0200;		break;
+			case 2:
+			case 11:
+			case 12:	child = segment;	break;
+			case 10:	put_word(0, segment, 0x1000-i*2); continue;
+			default:	child = 0;			break;
+		}
+		put_word(child, segment, 0x1000-i*2);
+	}
+	// set uss to file position and set usp ustack top position
+	running->uss = segment;
+	running->usp = 0x1000-24;
+	put_word(0, segment, running->usp + 8*2);
+	return 1;
+
 }
 
