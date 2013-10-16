@@ -86,7 +86,7 @@ int kfork(char *filename){
 // copy runnings uss to segment
 int copy_image(u16 segment){
 	int i;
-	for(i=0;i<0x1000;i+=2){
+	for(i=0;i<0x8000;i+=2){
 		put_word(get_word(running->uss, i),segment, i);
 	}
 	return 1;

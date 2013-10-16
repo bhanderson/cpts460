@@ -14,7 +14,7 @@ int wait(int *val){
 		for (i = 0; i < NPROC; i++) {
 			p = &proc[i];
 			if (p->ppid == running->pid && p->status != FREE){
-				child=1;
+				child++;
 				if (p->status == ZOMBIE){
 					p->status = FREE;
 					*val = p->exitCode;
