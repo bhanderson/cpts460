@@ -10,7 +10,7 @@ main()
 	while(1){
 		pid = getpid();
 		color = 0x000B + (pid % 5);
-		segment = (pid+1)*0x1000;
+		segment = (pid+1)*0x2000;
 		printf("==============================================\n");
 		printf("I am proc %din U mode: segment=%x\n", pid, segment);
 		show_menu();

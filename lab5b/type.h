@@ -16,6 +16,7 @@ typedef unsigned long  u32;
 
 #define READ_PIPE  4
 #define WRITE_PIPE 5
+#define BROKEN_PIPE 6
 
 #define NOFT      20
 #define NFD       10

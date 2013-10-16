@@ -67,7 +67,7 @@ int kfork(char *filename){
 	p->ksp = &(p->kstack[SSIZE-9]);
 	nproc++;
 	// make Umode image by loading /bin/u1 into segment
-	segment = (p->pid + 1)*0x1000;
+	segment = (p->pid + 1)*0x2000;
 	load(filename, segment);
 	printf("loaded %s at %u\n", filename, segment);
 	for (i = 1; i < 13; i++) {
@@ -78,10 +78,10 @@ int kfork(char *filename){
 			case 12:	child = segment;	break;
 			default:	child = 0;			break;
 		}
-		put_word(child, segment, 0x1000-i*2);
+		put_word(child, segment, 0x2000-i*2);
 	}
 	p->uss = segment;
-	p->usp = 0x1000 - 12*2;
+	p->usp = 0x2000 - 12*2;
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
 	enqueue(&readyQueue, p);

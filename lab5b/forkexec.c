@@ -17,14 +17,14 @@ int fork()
 		return -1;
 	}
 	p = &proc[pid];   // we can do this because of static pid
-	segment = (pid+1)*0x1000;
+	segment = (pid+1)*0x2000;
 	copyImage(running->uss, segment, 32*1024);
 
 	// YOUR CODE to make the child runnable in User mode
 	p->kstack[SSIZE -1] =(int)goUmode;
 	// clean the registers and set flag and uCs and uDs to runnings values
 	for (i = 1; i < 13; i++) {
-		child = 0x1000 - i*2;
+		child = 0x2000 - i*2;
 		switch(i){
 			case 1: put_word(segment, segment, child); break;
 			case 2: put_word(segment, segment, child); break;
@@ -64,7 +64,7 @@ int exec(char *filename)
 	// basically do the same initialization as kfork but with different path
 	char name[128];
 	int i, child;
-	u16 segment = (running->pid +1) * 0x1000;
+	u16 segment = (running->pid +1) * 0x2000;
 	// get the filename from umode
 	for (i = 0; i < 128; i++) {
 		name[i] = get_byte(segment, filename + i);
@@ -80,14 +80,14 @@ int exec(char *filename)
 			case 2:
 			case 11:
 			case 12:	child = segment;	break;
-			case 10:	put_word(0, segment, 0x1000-i*2); continue;
+			case 10:	put_word(0, segment, 0x2000-i*2); continue;
 			default:	child = 0;			break;
 		}
-		put_word(child, segment, 0x1000-i*2);
+		put_word(child, segment, 0x2000-i*2);
 	}
 	// set uss to file position and set usp ustack top position
 	running->uss = segment;
-	running->usp = 0x1000-24;
+	running->usp = 0x2000-24;
 	put_word(0, segment, running->usp + 8*2);
 	return 1;
 

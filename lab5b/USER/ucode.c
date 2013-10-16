@@ -122,7 +122,7 @@ int pfd()
 
 int read_pipe()
 {
-/*	char fds[32], buf[1024];
+	char fds[32], buf[1024];
 	int fd, n, nbytes;
 	pfd();
 
@@ -144,11 +144,11 @@ int read_pipe()
 	}
 	else
 		printf("read pipe failed\n");
-	*/
+
 }
 
 int write_pipe()
-{/*
+{
 	char fds[16], buf[1024];
 	int fd, n, nbytes;
 	pfd();
@@ -168,16 +168,16 @@ int write_pipe()
 	}
 	else
 		printf("write pipe failed\n");
-*/}
+}
 
 int close_pipe()
-{/*
+{
 	char s[16];
 	int fd;
 	printf("enter fd to close : ");
 	gets(s);
 	fd = atoi(s);
-	syscall(33, fd);*/
+	syscall(33, fd);
 }
 
 int invalid(name) char *name;
