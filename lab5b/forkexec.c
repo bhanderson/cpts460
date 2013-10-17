@@ -17,11 +17,30 @@ int fork()
 		return -1;
 	}
 	p = &proc[pid];   // we can do this because of static pid
+
+	for (i=0; i<NFD; i++){
+		p->fd[i] = running->fd[i];
+		if (p->fd[i] != 0){
+			p->fd[i]->refCount++;
+			if (p->fd[i]->mode == READ_PIPE)
+				p->fd[i]->pipe_ptr->nreader++;
+			if (p->fd[i]->mode == WRITE_PIPE){
+				printf("writepipe\n");
+				p->fd[i]->pipe_ptr->nwriter++;
+			}
+		}
+	}
+	printf("p->fd[i]->pipe_ptr->nreader: %d\n", p->fd[0]->pipe_ptr->nreader);
+	printf("p->fd[i]->pipe_ptr->nwriter: %d\n", p->fd[1]->pipe_ptr->nwriter);
 	segment = (pid+1)*0x2000;
 	copyImage(running->uss, segment, 32*1024);
+	p->uss = segment;
+	p->usp = 0x2000 - 24;
 
 	// YOUR CODE to make the child runnable in User mode
 	p->kstack[SSIZE -1] =(int)goUmode;
+	/**** ADD these : copy file descriptors ****/
+
 	// clean the registers and set flag and uCs and uDs to runnings values
 	for (i = 1; i < 13; i++) {
 		child = 0x2000 - i*2;
@@ -41,18 +60,6 @@ int fork()
 		}
 	}
 
-	/**** ADD these : copy file descriptors ****/
-
-	for (i=0; i<NFD; i++){
-		p->fd[i] = running->fd[i];
-		if (p->fd[i] != 0){
-			p->fd[i]->refCount++;
-			if (p->fd[i]->mode == READ_PIPE)
-				p->fd[i]->pipe_ptr->nreader++;
-			if (p->fd[i]->mode == WRITE_PIPE)
-				p->fd[i]->pipe_ptr->nwriter++;
-		}
-	}
 	return(p->pid);
 }
 

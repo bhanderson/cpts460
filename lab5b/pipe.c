@@ -1,9 +1,14 @@
 show_pipe(PIPE *p)
 {
+	int i,j;
 	printf("------------ PIPE CONTENTS ------------\n");
 	// print pipe information
-	printf("nreader=%d\tnwriter=%d\tdata=%d\troom=%d\ncontents=%s",
-			p->nreader, p->nwriter, p->data, p->room, p->buf);
+	printf("nreader=%d\tnwriter=%d\tdata=%d\troom=%d\ncontents=",
+			p->nreader, p->nwriter, p->data, p->room);
+	while(i != j && p->buf[i] != 0){
+		printf("%c", p->buf[i]);
+		i = ((i+1)%PSIZE);
+	}
 	printf("\n----------------------------------------\n");
 }
 
@@ -14,14 +19,10 @@ int pfd()
 	// print running process' opened file descriptors
 	int i = 0;
 	OFT *op = running->fd[i];
-	if(op->refCount==0){
-		printf("no opened files\n");
-		return 0;
-	}
 	printf("=========== valid fd ===========\n");
 	for (i = 0; i < NFD; i++) {
 		op = running->fd[i];
-		if(op->refCount>0)
+		if(op->refCount!=0)
 			printf("%d\t%s\trefCount = %d\n", i, MODE[op->mode - 4], op->refCount);
 	}
 	printf("=================================\n");
@@ -33,15 +34,15 @@ int read_pipe(int fd, char *buf, int n)
 	// your code for read_pipe()
 
 	int r = 0;
-	char tmp;
 	PIPE *p = running->fd[fd]->pipe_ptr;
-	char *data = p->buf;
 	if (n<=0) return 0;
+	if (running->fd[fd]->mode == 1) return 0;
 	if (running->fd[fd]==0) return -1;
 	while(n){
-		while(data){
-			tmp = get_word(running->uss, buf+r);
-			p->buf[ (p->tail++% PSIZE) ] = tmp;
+		while(p->data){
+			put_word(p->buf[ p->head ], running->uss, buf+r);
+			p->head++;
+			p->head = p->head % PSIZE;
 			n--; r++; p->data--; p->room++;
 			if (n==0) break;
 		}
@@ -64,18 +65,28 @@ int read_pipe(int fd, char *buf, int n)
 int write_pipe(int fd, char *buf, int n)
 {
 	// your code for write_pipe()
-
 	int r = 0;
 	char tmp;
 	PIPE *p = running->fd[fd]->pipe_ptr;
-	char *data = p->buf;
+
 	if (n<=0) return 0;
-	if (running->fd[fd]==0) return -1;
+	if (running->fd[fd]->mode==0) return -1;
+	printf("nreader, writer: %d\n", p->nreader);
+	show_pipe(p);
 	while (n){
+		printf("while ");
 		if (!p->nreader)
-			do_exit(BROKEN_PIPE);
+		{
+			//do_exit(BROKEN_PIPE);
+			printf("BROKEN_PIPE\n");
+			close_pipe(fd);
+			return 0;
+		}
 		while(p->room && n){
-			put_word(p->buf[ (p->tail++ % PSIZE) ], running->uss,  buf+r);
+			//tmp = get_word(running->uss, buf+r);
+			p->buf[ p->tail ] = buf[r];
+			p->tail++;
+			p->tail = p->tail % PSIZE;
 			r++; p->data++; p->room--; n--;
 		}
 		wakeup(&p->data);  // wakeup all readers, if any.
@@ -89,35 +100,48 @@ int write_pipe(int fd, char *buf, int n)
 
 int kpipe(int pd[2])
 {
-	// create a pipe; fill pd[0] pd[1] (in USER mode!!!) with descriptors
-
-	PIPE p;
-	OFT readOFT, writeOFT;
-	int i;
-	p.head = p.tail = p.data = 0;
-	p.room = PSIZE;
-	p.nreader = p.nwriter = 1;
-	readOFT.mode = READ_PIPE;
-	writeOFT.mode = WRITE_PIPE;
-	readOFT.refCount = writeOFT.refCount = 1;
-	readOFT.pipe_ptr = writeOFT.pipe_ptr = &p;
-	for (i = 0; i < NFD; i++) {
-		if(running->fd[i]->refCount == 0){
-			running->fd[i] = &readOFT;
-			running->fd[i+1] = &writeOFT;
+	int i, j, k;
+	PIPE *p;
+	for (i = 0; i < NPIPE; i++) {
+		if(pipe[i].busy==0)
+			break;
+	}
+	for (j = 0; j < NFD; j++) {
+		if (running->fd[j] == 0)
+			break;
+	}
+	for (k = 0; k < NOFT; k++) {
+		if(oft[k].refCount==0){
+			oft[k].refCount++;
+			oft[k+1].refCount++;
 			break;
 		}
 	}
-	printf("new fd list: \n");
-	pfd();
+
+	running->fd[j] = &oft[k];
+	running->fd[j+1] = &oft[k+1];
+	oft[k].pipe_ptr = &pipe[i];
+	oft[k+1].pipe_ptr = &pipe[i];
+	p = &pipe[i];
+
+	p->head = p->tail = p->data = 0;
+	p->room = PSIZE;
+	p->nreader = 1;
+	p->nwriter = 1;
+	printf("nreader, kpipe: %d\n", p->nreader);
+	p->busy = 1;
+	oft[k].mode = READ_PIPE;
+	oft[k+1].mode = WRITE_PIPE;
 	if(running->fd[i]==0)
 		return -1;
-
-	pd[0] = i;
-	pd[1] = i+1;
+	put_word(j, running->uss, pd);
+	put_word(j+1, running->uss, pd+1);
+	printf("CREATED PIPE: \n");
+	show_pipe(p);
 	return 0;
-
 }
+
+
 
 int close_pipe(int fd)
 {

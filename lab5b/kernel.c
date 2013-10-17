@@ -68,8 +68,8 @@ int kfork(char *filename){
 	nproc++;
 	// make Umode image by loading /bin/u1 into segment
 	segment = (p->pid + 1)*0x2000;
-	load(filename, segment);
-	printf("loaded %s at %u\n", filename, segment);
+	load("/bin/u1", segment);
+	printf("loaded %s at %u\n", "/bin/u1", segment);
 	for (i = 1; i < 13; i++) {
 		switch(i){
 			case 1:		child = 0x0200;		break;
