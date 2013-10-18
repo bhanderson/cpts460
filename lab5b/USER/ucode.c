@@ -131,7 +131,7 @@ int read_pipe()
 	fd = atoi(fds);
 	printf("read : enter nbytes : ");
 	gets(buf);
-	nbytes = strlen(buf);
+	nbytes = atoi(buf);
 	printf("fd=%d  nbytes=%d\n", fd, nbytes);
 
 	n = syscall(31, fd, buf, nbytes);

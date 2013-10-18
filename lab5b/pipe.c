@@ -72,9 +72,7 @@ int write_pipe(int fd, char *buf, int n)
 	if (n<=0) return 0;
 	if (running->fd[fd]->mode==0) return -1;
 	printf("nreader, writer: %d\n", p->nreader);
-	show_pipe(p);
 	while (n){
-		printf("while ");
 		if (!p->nreader)
 		{
 			//do_exit(BROKEN_PIPE);
@@ -83,8 +81,9 @@ int write_pipe(int fd, char *buf, int n)
 			return 0;
 		}
 		while(p->room && n){
-			//tmp = get_word(running->uss, buf+r);
-			p->buf[ p->tail ] = buf[r];
+			tmp = get_word(running->uss, buf+r);
+			//p->buf[ p->tail ] = buf[r];
+			p->buf[ p->tail ] = tmp;
 			p->tail++;
 			p->tail = p->tail % PSIZE;
 			r++; p->data++; p->room--; n--;
@@ -95,6 +94,7 @@ int write_pipe(int fd, char *buf, int n)
 		sleep(&p->room); // sleep for room
 	}
 
+	printf("end write\n");
 	show_pipe(p);
 }
 

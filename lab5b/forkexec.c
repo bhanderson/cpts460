@@ -20,18 +20,19 @@ int fork()
 
 	for (i=0; i<NFD; i++){
 		p->fd[i] = running->fd[i];
+
 		if (p->fd[i] != 0){
 			p->fd[i]->refCount++;
+
 			if (p->fd[i]->mode == READ_PIPE)
 				p->fd[i]->pipe_ptr->nreader++;
+
 			if (p->fd[i]->mode == WRITE_PIPE){
-				printf("writepipe\n");
 				p->fd[i]->pipe_ptr->nwriter++;
 			}
 		}
 	}
-	printf("p->fd[i]->pipe_ptr->nreader: %d\n", p->fd[0]->pipe_ptr->nreader);
-	printf("p->fd[i]->pipe_ptr->nwriter: %d\n", p->fd[1]->pipe_ptr->nwriter);
+
 	segment = (pid+1)*0x2000;
 	copyImage(running->uss, segment, 32*1024);
 	p->uss = segment;
