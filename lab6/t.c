@@ -196,3 +196,9 @@ int scheduler()
 }
 
 
+int mysleep (time) int time;
+{
+	running->time = time;
+	sleep(running->pid);
+
+}

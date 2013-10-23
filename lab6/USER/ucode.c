@@ -1,14 +1,14 @@
 // ucode.c file
 
 char *cmd[]={"getpid", "ps", "chname", "kmode", "switch", "wait", "die",
-	"fork", "exec", "color", 0};
+	"fork", "exec", "color", "null", "sleep", 0};
 
 int show_menu()
 {
-	printf("************************* Menu *****************************\n");
-	printf("*  ps  chname  kmode  switch  wait  die  fork  exec  color *\n");
-	/*         1     2      3       4      5     6    7     8      9   */
-	printf("************************************************************\n");
+	printf("************************* Menu **********************************\n");
+	printf("*  ps  chname  kmode  switch  wait  die  fork  exec  color sleep*\n");
+	/*         1     2      3       4      5     6    7     8      9     11 */
+	printf("*****************************************************************\n");
 }
 
 int find_cmd(name) char *name;
@@ -120,3 +120,10 @@ int invalid(name) char *name;
 	printf("Invalid command : %s\n", name);
 }
 
+int usleep(){
+	char c;
+	printf("\ninput time to sleep: ");
+	c = getc() - '0';
+	printf("%d\n", c);
+	return syscall(11, c, 0, 0);
+}
