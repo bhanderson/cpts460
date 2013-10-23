@@ -121,9 +121,9 @@ int invalid(name) char *name;
 }
 
 int usleep(){
-	char c;
+	char c[10];
 	printf("\ninput time to sleep: ");
-	c = getc() - '0';
-	printf("%d\n", c);
-	return syscall(11, c, 0, 0);
+	gets(c);
+	printf("%s\n", c);
+	return syscall(11, atoi(c), 0, 0);
 }

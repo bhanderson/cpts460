@@ -24,6 +24,7 @@ int enable_irq(irq_nr) unsigned irq_nr;
 
 ushort tick, sec, min ,hr;
 ushort floppy, procsleep;
+PROC *p;
 int temprow, tempcol;
 int timer_init()
 {
@@ -78,34 +79,40 @@ int thandler()
 		//printf("running->time=%d", running->time);
 		// a proc is asleep so decrement procsleep
 		if (sleepList!=0){
-			// decrement top of sleeplist time
-			if (sleepList->time > 0){
-				sleepList->time --;
-		//		printf("%d", sleepList->time);
+			p = sleepList;
+			// still in sleepList
+			while(p){
+				// if proc still has time left decrement time
+				if (p->time > 0)
+					p->time --;
+				// if proc is ready to be waked up wake up
+				if (p->time <= 0)
+					wakeup(p->pid);
+				// else go to next proc in sleeplist
+				p = p->next;
 			}
-			if (sleepList->time == 0)
-				wakeup(sleepList->pid);
+		}
+
 
 		}
-	}
-	// switch procs at set value
-	if (running->time == 0 && inkmode==1){
+		// switch procs at set value
+		if (running->time == 0 && inkmode==1){
+			out_byte(0x20, 0x20);
+			do_switch();
+			running->time=5;
+		}
+		// if floppy drive is on turn on light
+		if (floppy==1 && sec%5==0)
+			out_byte(0x0C, 0x3F2);
+		// if floppy drive is off turn off light
+		if (floppy==0 && sec%5==0)
+			out_byte(0x1C, 0x3F2);
+
+
+
 		out_byte(0x20, 0x20);
-		do_switch();
-		running->time=5;
+
 	}
-	// if floppy drive is on turn on light
-	if (floppy==1 && sec%5==0)
-		out_byte(0x0C, 0x3F2);
-	// if floppy drive is off turn off light
-	if (floppy==0 && sec%5==0)
-		out_byte(0x1C, 0x3F2);
-
-
-
-	out_byte(0x20, 0x20);
-
-}
 
 
 
