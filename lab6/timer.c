@@ -74,7 +74,7 @@ int thandler()
 		row = temprow;
 		column = tempcol;
 		// decrement runnings time so its not takign all the work
-		if (running->time>=1)
+		if (running->time>=1 && inkmode == 1)
 			running->time--;
 		//printf("running->time=%d", running->time);
 		// a proc is asleep so decrement procsleep
@@ -86,7 +86,7 @@ int thandler()
 				if (p->time > 0)
 					p->time --;
 				// if proc is ready to be waked up wake up
-				if (p->time <= 0)
+				if (p->time <= 0 && p->event == p->pid)
 					wakeup(p->pid);
 				// else go to next proc in sleeplist
 				p = p->next;
@@ -99,7 +99,7 @@ int thandler()
 		if (running->time == 0 && inkmode==1){
 			out_byte(0x20, 0x20);
 			do_switch();
-			running->time=5;
+			running->time=10;
 		}
 		// if floppy drive is on turn on light
 		if (floppy==1 && sec%5==0)
