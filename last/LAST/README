@@ -1,0 +1,6 @@
+-------- HOW TO RECOMPILE and INSTALL user mode programs -------------
+
+ To compile and install a user mode program, e.g. test.c
+    Run  mku test
+ This will copy test to /bin (to default partition 3)  
+---------------------------------------------------------------------

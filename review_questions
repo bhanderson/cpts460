@@ -1,0 +1,25 @@
+BOOTER
+(1) what does bios do?
+		gets the first 512 bytes and runs it
+(3) what does the boot SECTOR do?
+(4) how to load disk block into memory
+		call bios int 0x13, bios will load into memory
+(5) why are cs,ds,ss set to the same value,
+(6) how to convert a disk block number into cyl, head, sector for bios
+		mailmans algorithm
+
+MULTITASKING
+(1) How do we start P0
+		the booter starts p0 in initialization
+(4) 	pretend it did a tswitch 
+
+(5) syscall how can it find the values of a,b,c,d?
+		they are still in user mode start at usp* and get_word
+(6) ex register 
+
+(8) fork and exec
+	copy the proc and fix the stack to return to own segment
+	exec loads file into umode area
+
+(9) pipe, 2 processes writer and reader on either end, synchronized, writer
+writes until no room and sleep, reader reads until no data or sleeps
