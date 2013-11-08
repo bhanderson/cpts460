@@ -1,11 +1,10 @@
 #include "type.h"
-PROC* getproc();
-PROC* get_proc(PROC * list);
+
 void enqueue(PROC **queue, PROC *p);
-PROC *dequeue(PROC **queue);
+PROC *dequeue(PROC** queue);
 PROC proc[NPROC], *freeList, *sleepList, *running, *readyQueue;
 int procSize = sizeof(PROC);
-int goUmode();
+
 /******************** use your OWN LAB5 code *****************
 #include "io.c"
 #include "queue.c"
@@ -17,7 +16,7 @@ int goUmode();
 #include "pv.c"
 #include "serial.c"
 #include "kernel.h"
-//#include "kbd.c"
+#include "kbd.c"
 
 int body();
 
@@ -42,8 +41,8 @@ int init()
 	readyQueue = 0;
 
 	// create and run P0
-	p = getproc(&freeList);
-	p->priority = 0;
+	p = getproc();
+	p->pri = 0;
 	p->status = READY;
 	p->inkmode = 1;
 	running = p;
@@ -62,8 +61,8 @@ int body()
 		switch(c){
 			case 's' : tswitch(); break;
 			case 'u' : printf("\nProc %d ready to go U mode\n", running->pid);
-					   goUmode(); break;
-			case 'f':  fork();  break;
+					   goUmode(); running->inkmode--; break;
+			case 'f':  myfork();  break;
 			case 'q' : kexit();   break;
 			case 'i' : iline();   break;
 			case 'o' : oline();   break;
@@ -71,7 +70,23 @@ int body()
 	}
 }
 
-int int80h(), s0inth();//, kbinth();  // int s1inth() // for serial port 1
+/***************************************************************
+  myfork(segment) creates a child task and returns the child pid.
+  When scheduled to run, the child task resumes to body(pid) in
+  K mode. Its U mode environment is set to segment.
+ ****************************************************************/
+int myfork()
+{
+	int child;
+	child = kfork("/bin/u1");
+	if (child < 0){
+		printf("myfork failed\n");
+		return;
+	}
+	printf("task %d return from myfork() : child=%d\n", running->pid, child);
+}
+
+int int80h(), s0inth(),  s1inth(); // for serial port 1
 
 int set_vec(vector, addr) ushort vector, addr;
 {
@@ -81,7 +96,8 @@ int set_vec(vector, addr) ushort vector, addr;
 	put_word(addr, 0, location);
 	put_word(cs,0,location+2);
 }
-
+int kbinth();
+int tinth();
 main()
 {
 	int pid;
@@ -93,13 +109,18 @@ main()
 
 	set_vec(80, int80h);
 
-	kfork("/bin/u1");
+	pid = myfork("/bin/u1");
+
+	set_vec(9, kbinth);
+	kbinit();
+	lock();
+//	set_vector(8, tinth);
+//	timer_init();
 
 	set_vec(12, s0inth);
-	//set_vec(11, s1inth); // for second serial port at 0x2F8
+	set_vec(11, s1inth); // for second serial port at 0x2F8
 	sinit();
-	//set_vec(9, kbinth);
-	//kbinit();
+
 	while(1){
 		if (readyQueue)
 			tswitch();
@@ -110,7 +131,7 @@ main()
 int scheduler()
 {
 	if (running->status == READY)
-		enqueue(&readyQueue, running);
+		enqueue(&readyQueue,running);
 	running = dequeue(&readyQueue);
 }
 

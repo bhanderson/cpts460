@@ -1,0 +1,205 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BACKSPACE	serial.c	8;"	d	file:
+BEEP	serial.c	7;"	d	file:
+BLOCK	type.h	18;"	d
+BOOTSEG	ts.s	/^                BOOTSEG = 0x1000$/;"	d
+DATA	serial.c	13;"	d	file:
+DIVH	serial.c	15;"	d	file:
+DIVL	serial.c	14;"	d	file:
+EBUFLEN	serial.c	5;"	d	file:
+FREE	type.h	14;"	d
+IER	serial.c	16;"	d	file:
+IIR	serial.c	17;"	d	file:
+INBUFLEN	serial.c	3;"	d	file:
+INK	ts.s	/^INK =   8$/;"	d
+LCR	serial.c	18;"	d	file:
+LSR	serial.c	20;"	d	file:
+MCR	serial.c	19;"	d	file:
+MSR	serial.c	21;"	d	file:
+NPROC	type.h	11;"	d
+NR_STTY	serial.c	10;"	d	file:
+NULL	type.h	10;"	d
+NULLCHAR	serial.c	6;"	d	file:
+OUTBUFLEN	serial.c	4;"	d	file:
+P	pv.c	/^int P(s) struct semaphore *s;$/;"	f
+PROC	type.h	/^}PROC;        $/;"	t	typeref:struct:proc
+READY	type.h	15;"	d
+SLEEP	type.h	16;"	d
+SSIZE	type.h	12;"	d
+SSP	ts.s	/^                SSP     = 0$/;"	d
+USP	ts.s	/^USP =   6$/;"	d
+USS	ts.s	/^USS =   4$/;"	d
+V	pv.c	/^int V(s) struct semaphore *s;$/;"	f
+ZOMBIE	type.h	17;"	d
+_diskr	USER/u.s	/^_diskr:$/;"	l
+_diskr	ts.s	/^_diskr:                             $/;"	l
+_diskw	ts.s	/^_diskw:                             $/;"	l
+_get_byte	USER/u.s	/^_get_byte:$/;"	l
+_get_byte	ts.s	/^_get_byte:$/;"	l
+_getc	USER/u.s	/^_getc:$/;"	l
+_getc	ts.s	/^_getc:$/;"	l
+_getcs	USER/u.s	/^_getcs:$/;"	l
+_getcs	ts.s	/^_getcs: mov   ax, cs$/;"	l
+_getds	USER/u.s	/^_getds: mov   ax, ds$/;"	l
+_goUmode	ts.s	/^_goUmode:                       ! goYmode(): same as return from INTERRUPT$/;"	l
+_in_byte	ts.s	/^_in_byte:$/;"	l
+_inces	ts.s	/^_inces:                        ! inces[] inc ES by 0x40, or 1K$/;"	l
+_int80	USER/u.s	/^_int80:$/;"	l
+_int80h	ts.s	/^_int80h: INTH kcinth$/;"	l
+_int_off	ts.s	/^_int_off:             ! cli, return old flag register$/;"	l
+_int_on	ts.s	/^_int_on:              ! int_on(int SR)$/;"	l
+_ireturn	ts.s	/^_ireturn:                       ! return from INTERRUPTs$/;"	l
+_kreboot	ts.s	/^_kreboot:$/;"	l
+_lock	ts.s	/^_lock:  $/;"	l
+_out_byte	ts.s	/^_out_byte:$/;"	l
+_put_byte	USER/u.s	/^_put_byte:$/;"	l
+_put_byte	ts.s	/^_put_byte:$/;"	l
+_putc	USER/u.s	/^_putc:           $/;"	l
+_putc	ts.s	/^_putc:           $/;"	l
+_resetVideo	ts.s	/^_resetVideo:	$/;"	l
+_s0inth	ts.s	/^_s0inth: INTH s0handler$/;"	l
+_s1inth	ts.s	/^_s1inth: INTH s1handler$/;"	l
+_setes	ts.s	/^_setes:  $/;"	l
+_tswitch	ts.s	/^_tswitch:$/;"	l
+_unlock	ts.s	/^_unlock:$/;"	l
+bad	ts.s	/^bad:            .asciz  "Error!"$/;"	l
+begbss	USER/u.s	/^begbss:$/;"	l
+begbss	ts.s	/^begbss:$/;"	l
+begdata	USER/u.s	/^begdata:$/;"	l
+begdata	ts.s	/^begdata:$/;"	l
+begtext	USER/u.s	/^begtext:                                             ! text,data,bss segments$/;"	l
+begtext	ts.s	/^begtext:                                             ! text,data,bss segments$/;"	l
+bgetc	serial.c	/^int bgetc(port) int port;$/;"	f
+body	t.c	/^int body()$/;"	f
+bputc	serial.c	/^int bputc(port, c) int port, c;$/;"	f
+chname	USER/ucode.c	/^int chname()$/;"	f
+chname	int.c	/^int chname(y) char *y;$/;"	f
+cmd	USER/ucode.c	/^char *cmd[]={"getpid", "ps", "chname", "kmode", "switch", "wait", "die", $/;"	v
+dead	USER/u.s	/^dead:   jmp   dead$/;"	l
+dead	ts.s	/^dead:   jmp   dead$/;"	l
+disable_tx	serial.c	/^disable_tx(struct stty *t)$/;"	f
+do_errors	serial.c	/^int do_errors()$/;"	f
+do_modem	serial.c	/^int do_modem()$/;"	f
+do_rx	serial.c	/^int do_rx(struct stty *tty)   \/* interrupts already disabled *\/$/;"	f
+do_tx	serial.c	/^int do_tx(struct stty *tty)$/;"	f
+e_count	serial.c	/^   int ehead, etail, e_count;$/;"	m	struct:stty	file:
+ebuf	serial.c	/^   char ebuf[EBUFLEN];$/;"	m	struct:stty	file:
+echo	serial.c	/^   char echo;   \/* echo inputs *\/$/;"	m	struct:stty	file:
+ehead	serial.c	/^   int ehead, etail, e_count;$/;"	m	struct:stty	file:
+enable_irq	serial.c	/^int enable_irq(irq_nr) unsigned irq_nr;$/;"	f
+enable_tx	serial.c	/^enable_tx(struct stty *t)$/;"	f
+eof	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+erase	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+error	ts.s	/^error:$/;"	l
+etail	serial.c	/^   int ehead, etail, e_count;$/;"	m	struct:stty	file:
+event	type.h	/^        int     event;$/;"	m	struct:proc
+find	ts.s	/^find:     call	 _scheduler$/;"	l
+find_cmd	USER/ucode.c	/^int find_cmd(name) char *name;$/;"	f
+freeList	t.c	/^PROC proc[NPROC], *freeList, *running, *readyQueue;$/;"	v
+get_pid	USER/ucode.c	/^int get_pid()$/;"	f
+iline	t.c	/^int iline()$/;"	f
+inbuf	serial.c	/^   char inbuf[INBUFLEN];$/;"	m	struct:stty	file:
+inchars	serial.c	/^  struct semaphore inchars;$/;"	m	struct:stty	typeref:struct:stty::semaphore	file:
+inhead	serial.c	/^   int inhead, intail;$/;"	m	struct:stty	file:
+init	t.c	/^int init()$/;"	f
+inkmode	type.h	/^        int    inkmode;$/;"	m	struct:proc
+inline	serial.c	/^char inline[64];$/;"	v
+intail	serial.c	/^   int inhead, intail;$/;"	m	struct:stty	file:
+intr	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+invalid	USER/ucode.c	/^int invalid(char *name)$/;"	f
+ison	serial.c	/^   char ison;   \/* on or off *\/$/;"	m	struct:stty	file:
+kcinth	int.c	/^int kcinth() $/;"	f
+kill	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+kline	t.c	/^char kline[64];$/;"	v
+kmode	USER/ucode.c	/^int kmode()$/;"	f
+kmode	int.c	/^int kmode()$/;"	f
+kps	int.c	/^int kps()$/;"	f
+ksp	type.h	/^        int    *ksp; $/;"	m	struct:proc
+kstack	type.h	/^        int kstack[SSIZE];$/;"	m	struct:proc
+kswitch	USER/ucode.c	/^int kswitch()$/;"	f
+main	USER/u1.c	/^main()$/;"	f
+main	USER/u2.c	/^main()$/;"	f
+main	t.c	/^main()$/;"	f
+mes	USER/u.s	/^mes:    .asciz "BACK TO ASSEMBLY AGAIN\\n\\r"$/;"	l
+msg	ts.s	/^msg:    .asciz "BACK TO ASSEMBLY AND HANG\\n\\r"    $/;"	l
+myexec	USER/ucode.c	/^int myexec(char *file)$/;"	f
+myexit	USER/ucode.c	/^int myexit()$/;"	f
+myfork	t.c	/^int myfork()$/;"	f
+mywait	USER/ucode.c	/^int mywait()$/;"	f
+name	type.h	/^        char    name[32];    $/;"	m	struct:proc
+next	type.h	/^        struct proc *next;$/;"	m	struct:proc	typeref:struct:proc::proc
+oline	t.c	/^int oline()$/;"	f
+outbuf	serial.c	/^   char outbuf[OUTBUFLEN];$/;"	m	struct:stty	file:
+outhead	serial.c	/^   int outhead, outtail;$/;"	m	struct:stty	file:
+outline	serial.c	/^char outline[64];$/;"	v
+outroom	serial.c	/^  struct semaphore outroom;$/;"	m	struct:stty	typeref:struct:stty::semaphore	file:
+outtail	serial.c	/^   int outhead, outtail;$/;"	m	struct:stty	file:
+p	serial.c	/^char *p = "\\n\\rSerial Port Ready\\n\\r\\007";$/;"	v
+pStatus	int.c	/^char *pStatus[] = {"FREE","READY","SLEEP","ZOMBIE","BLOCK",0};$/;"	v
+pid	USER/ucode.c	/^int pid;$/;"	v
+pid	type.h	/^        int     pid;$/;"	m	struct:proc
+pop	ts.s	/^	  pop    di$/;"	d
+pop	ts.s	/^	pop di$/;"	d
+pop	ts.s	/^	pop ds$/;"	d
+pop	ts.s	/^          pop    dx$/;"	d
+pop	ts.s	/^          pop  ds              ! let     DS = CS  to access Kernel data $/;"	d
+pop	ts.s	/^        pop dx$/;"	d
+port	serial.c	/^   int port;$/;"	m	struct:stty	file:
+ppid	type.h	/^        int     ppid;$/;"	m	struct:proc
+pri	type.h	/^        int     pri;          $/;"	m	struct:proc
+proc	t.c	/^PROC proc[NPROC], *freeList, *running, *readyQueue;$/;"	v
+proc	type.h	/^typedef struct proc{$/;"	s
+procSize	t.c	/^int procSize = sizeof(PROC);$/;"	v
+ps	USER/ucode.c	/^int ps()$/;"	f
+push	ts.s	/^          push   di$/;"	d
+push	ts.s	/^          push   dx$/;"	d
+push	ts.s	/^          push di$/;"	d
+push	ts.s	/^          push ds$/;"	d
+push	ts.s	/^          push dx$/;"	d
+queue	pv.c	/^  PROC *queue;$/;"	m	struct:semaphore	file:
+quit	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+readyQueue	t.c	/^PROC proc[NPROC], *freeList, *running, *readyQueue;$/;"	v
+resume	ts.s	/^resume:	  mov	 bx, _running$/;"	l
+running	t.c	/^PROC proc[NPROC], *freeList, *running, *readyQueue;$/;"	v
+s0handler	serial.c	/^int s0handler()$/;"	f
+s1handler	serial.c	/^int s1handler()$/;"	f
+scheduler	t.c	/^int scheduler()$/;"	f
+secho	serial.c	/^int secho(struct stty *tty, int c)$/;"	f
+semaphore	pv.c	/^struct semaphore{$/;"	s	file:
+set_vec	t.c	/^int set_vec(vector, addr) ushort vector, addr;$/;"	f
+sgetc	serial.c	/^int sgetc(struct stty *tty)$/;"	f
+sgetline	serial.c	/^int sgetline(int port, char *line)$/;"	f
+shandler	serial.c	/^int shandler(int port)$/;"	f
+show_menu	USER/ucode.c	/^int show_menu()$/;"	f
+sin	USER/ucode.c	/^int sin()$/;"	f
+sin	serial.c	/^int sin(int port, char *z)$/;"	f
+sinit	serial.c	/^int sinit()$/;"	f
+sout	USER/ucode.c	/^int sout()$/;"	f
+sout	serial.c	/^int sout(int port, char *z)$/;"	f
+sputc	serial.c	/^int sputc(struct stty *tty, int c)$/;"	f
+sputline	serial.c	/^int sputline(int port, char *line)$/;"	f
+start	ts.s	/^start:$/;"	l
+status	type.h	/^        int     status;$/;"	m	struct:proc
+stty	serial.c	/^struct stty {$/;"	s	file:
+stty	serial.c	/^} stty[NR_STTY];$/;"	v	typeref:struct:stty
+tname	t.c	/^char *tname[]={"Mercury", "Venus", "Earth",  "Mars", "Jupiter",$/;"	v
+tx_on	serial.c	/^   int tx_on;$/;"	m	struct:stty	file:
+u16	type.h	/^typedef unsigned short u16;$/;"	t
+u32	type.h	/^typedef unsigned long  u32;$/;"	t
+u8	type.h	/^typedef unsigned char  u8;$/;"	t
+ufork	USER/ucode.c	/^int ufork()$/;"	f
+uline	USER/ucode.c	/^char uline[64];$/;"	v
+ulong	type.h	/^typedef unsigned long  ulong;$/;"	t
+ushort	USER/ucode.c	/^typedef unsigned short ushort;$/;"	t	file:
+ushort	type.h	/^typedef unsigned short ushort;$/;"	t
+usp	type.h	/^        int    uss,usp;$/;"	m	struct:proc
+uss	type.h	/^        int    uss,usp;$/;"	m	struct:proc
+value	pv.c	/^  int value;$/;"	m	struct:semaphore	file:
+x_off	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+x_on	serial.c	/^   char erase, kill, intr, quit, x_on, x_off, eof;$/;"	m	struct:stty	file:
+xkmode	ts.s	/^xkmode:  $/;"	l

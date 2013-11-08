@@ -3,11 +3,10 @@
 .globl begtext, begdata, begbss                      ! needed by linker
 
 !               IMPORTS and EXPORTS
-.globl _resetVideo,_getc,_putc,_setes,_inces 
-.globl _main,_prints                                 
+.globl _resetVideo,_getc,_putc,_setes,_inces
+.globl _main,_prints
 .globl _tswitch,_running,_scheduler
 .globl _int80h,_kcinth
-!.globl _kbinth,_kbhandler
 .globl _diskr,_diskw
 .globl _getcs, _goUmode, _procSize
 .globl _get_byte,_put_byte
@@ -19,34 +18,35 @@
 !.globl _tinth, _thandler
 .globl _s0inth, _s0handler
 .globl _s1inth, _s1handler
+.globl _kbinth, _kbhandler
 
-.text                                                ! these tell as:	
+.text                                                ! these tell as:
 begtext:                                             ! text,data,bss segments
 .data                                                ! are all the same.
 begdata:
 .bss
 begbss:
-.text                                                
+.text
 
 start:
-        mov     ax,cs                   ! establish segments 
-        mov     ds,ax                   ! we know ES,CS=0x1000. Let DS=CS  
+        mov     ax,cs                   ! establish segments
+        mov     ds,ax                   ! we know ES,CS=0x1000. Let DS=CS
         mov     ss,ax                   ! SS = CS ===> all point to 0x1000
         mov     es,ax
         mov     sp,#SSP                 ! SP = 32KB
 
         call _main                      ! call main[] in C
 
-! if ever return, just hang     
+! if ever return, just hang
         mov   ax, #msg
         push  ax
         call  _prints
 !_exit:
 dead:   jmp   dead
-msg:    .asciz "BACK TO ASSEMBLY AND HANG\n\r"    
+msg:    .asciz "BACK TO ASSEMBLY AND HANG\n\r"
 
 _kreboot:
-        jmpi 0,0xFFFF	
+        jmpi 0,0xFFFF
 !*************************************************************
 !     KCW  added functions for MT system
 !************************************************************
@@ -97,9 +97,9 @@ INK =   8
           push es
           push ds
 
-          push cs              ! we know CS=0x1000 
-          pop  ds              ! let     DS = CS  to access Kernel data 
-          
+          push cs              ! we know CS=0x1000
+          pop  ds              ! let     DS = CS  to access Kernel data
+
  	  mov bx,_running   	! ready to access proc
           inc INK[bx]
           cmp INK[bx],#1
@@ -110,8 +110,8 @@ INK =   8
           mov USS[si],ss        ! save SS  in proc.USS
           mov USP[si],sp        ! save SP  in proc.USP
 
-          ! Set kernel sp to proc[i].ksp 
-          mov  di,ds            ! stupid !!        
+          ! Set kernel sp to proc[i].ksp
+          mov  di,ds            ! stupid !!
           mov  es,di            ! CS=DS=SS=ES in Kmode
           mov  ss,di
           mov  sp,_running      ! sp -> running's kstack[] high end
@@ -126,7 +126,7 @@ INK =   8
 _int80h: INTH kcinth
 
 !_tinth:  INTH thandler
-!_kbinth: INTH kbhandler
+_kbinth: INTH kbhandler
 
 _s0inth: INTH s0handler
 _s1inth: INTH s1handler
@@ -148,7 +148,7 @@ _goUmode:                       ! goYmode(): same as return from INTERRUPT
         mov ax,USS[bx]
         mov ss,ax               ! restore SS
         mov sp,USP[bx]          ! restore SP
-xkmode:  
+xkmode:
 	pop ds
 	pop es
 	pop di
@@ -157,23 +157,23 @@ xkmode:
         pop dx
         pop cx
         pop bx
-        pop ax 
+        pop ax
         iret
 
         !--------------------------------
         ! resetVideo[] : clear screen, home cursor
         !--------------------------------
-_resetVideo:	
+_resetVideo:
         mov     ax, #0x0012
         int     0x10                    ! call BIOS to do it
 
         mov     ax, #0x0200             ! Home the cursor
         xor     bx, bx
         xor     dx, dx
-        int     0x10                    ! call BIOS to home cursor 
-        ret 
+        int     0x10                    ! call BIOS to home cursor
+        ret
 
-_diskr:                             
+_diskr:
         push  bp
         mov   bp,sp
 
@@ -182,15 +182,15 @@ _diskr:
         movb  cl, 8[bp]        ! sector
 	incb  cl
         movb  ch, 4[bp]        ! cyl
-        mov   ax, #0x0202      ! READ 2 sectors 
+        mov   ax, #0x0202      ! READ 2 sectors
         mov   bx, 10[bp]       ! put buf value in BX ==> addr=[ES,BX]
-        int  0x13              ! call BIOS to read the block 
+        int  0x13              ! call BIOS to read the block
         jb   error             ! to error if CarryBit is on [read failed]
 
         pop   bp
         ret
 
-_diskw:                             
+_diskw:
         push  bp
         mov   bp,sp
 
@@ -198,9 +198,9 @@ _diskw:
         movb  dh, 6[bp]        ! head
         movb  cl, 8[bp]        ! sector
         movb  ch, 4[bp]        ! cyl
-        mov   ax, #0x0302      ! WRITE 2 sectors 
+        mov   ax, #0x0302      ! WRITE 2 sectors
         mov   bx, 10[bp]       ! put buf value in BX ==> addr=[ES,BX]
-        int  0x13              ! call BIOS to read the block 
+        int  0x13              ! call BIOS to read the block
         jb   error             ! to error if CarryBit is on [read failed]
 
         pop  bp
@@ -212,12 +212,11 @@ _diskw:
 _getc:
         xorb   ah,ah           ! clear ah
         int    0x16            ! call BIOS to get a char in AX
-        ret 
-
+        ret
         !----------------------------------------------
         ! void putc[char c]  function: print a char
         !----------------------------------------------
-_putc:           
+_putc:
         push   bp
         mov    bp,sp
 
@@ -229,12 +228,12 @@ _putc:
         mov    sp,bp
         pop    bp
         ret
-	
-_setes:  
+
+_setes:
          push  bp
          mov   bp,sp
 
-         mov   ax,4[bp]        
+         mov   ax,4[bp]
          mov   es,ax
 
          pop   bp
@@ -253,7 +252,7 @@ error:
         mov  bx, #bad
         push bx
         call _prints
-        
+
         int  0x19                       ! reboot
 bad:            .asciz  "Error!"
 
@@ -297,7 +296,7 @@ _put_byte:
 	pop  bp			! restore bp
 	ret			! return to caller
 
-	
+
 ! sr = int_off(), int_on(sr) functions
 _int_off:             ! cli, return old flag register
         pushf
@@ -317,7 +316,7 @@ _int_on:              ! int_on(int SR)
 !*===========================================================================*
 !*				lock					     *
 !*===========================================================================*
-_lock:  
+_lock:
 	cli			! disable interrupts
 	ret			! return to caller
 

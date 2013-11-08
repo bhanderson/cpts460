@@ -1,96 +1,47 @@
-void enqueue(PROC **queue, PROC *p)
-{
-	PROC *a, *b;
-	a = *queue;
-	if (a == 0 || p->priority > a->priority){
-		p->next = a;
+void enqueue(PROC **queue, PROC *p){
+	PROC *past;
+	PROC *temp;
+
+	past = *queue;
+	if (past == NULL || p->pri > past->pri){
+		p->next = past;
 		*queue = p;
 		return;
 	}
-	b = a->next;
-
-	while(a != 0 && a->priority >= p->priority){
-		a = a->next;
-		b = b->next;
+	temp = past->next;
+	while (temp != NULL && temp->pri >= p->pri ){
+		past = past->next;
+		temp = temp->next;
 	}
-	a->next = p;
-	p->next = b;
+	past->next = p;
+	p->next = temp;
 }
 
 PROC *dequeue(PROC **queue){
 	PROC *p = *queue;
-	if(*queue != 0){
-		*queue = (*queue)->next;
-	}
+	if (p!=0)
+		*queue = p->next;
+	//printf("dequeued proc #%d\n", p->pid);
 	return p;
 }
 
-PROC *getproc(PROC **list){
+PROC * get_proc(PROC **list){
 	return dequeue(list);
 }
 
-PROC *get_proc(PROC **list){
-	return dequeue(list);
+PROC *getproc(){
+	return get_proc(&freeList);
 }
 
-void printQueue(PROC *list){
-	PROC * p = list;
-	while(p!=0){
-		printf("[%d]=>",p->pid);
+void printQueue(PROC *queue){
+	PROC *p = queue;
+	while(p!=NULL){
+		printf("[%d]->",p->pid);
 		p = p->next;
 	}
 	printf("\n");
 }
-int copyImage(u16 s1,u16 s2, u16 size)
-{
-	// your copyimage function
-	int i;
-	for (i = 0; i < size; i+=2) {
-		put_word(get_word(s1, i), s2, i);
-	}
-}
 
-int goUmode();
-int fork()
-{
-	PROC *p;  int i, child, pid;  u16 segment;
-
-	pid = kfork(0);   // kfork() but do NOT load any Umode image for child
-	if (pid < 0){     // kfork failed
-		return -1;
-	}
-	p = &proc[pid];   // we can do this because of static pid
-
-	segment = (pid+1)*0x2000;
-	copyImage(running->uss, segment, 32*1024);
-	p->uss = segment;
-	p->usp = 0x2000 - 24;
-
-	// YOUR CODE to make the child runnable in User mode
-	p->kstack[SSIZE -1] =(int)body;
-	/**** ADD these : copy file descriptors ****/
-
-	// clean the registers and set flag and uCs and uDs to runnings values
-	for (i = 1; i < 13; i++) {
-		child = 0x2000 - i*2;
-		switch(i){
-			case 1: put_word(segment, segment, child); break;
-			case 2: put_word(segment, segment, child); break;
-			case 3:
-			case 4:
-			case 5:
-			case 6:
-			case 7:
-			case 8:
-			case 9:
-			case 10: put_word(0,segment, child); break;
-			case 11:
-			case 12: put_word(segment, segment, child); break;
-		}
-	}
-
-	return(p->pid);
-}
 int kfork(char *filename){
 	PROC *p;
 	int  i, child;
@@ -106,53 +57,7 @@ int kfork(char *filename){
 	p->status = READY;
 	p->ppid = running->pid;
 	p->parent = running;
-	p->priority = 1;                 // all of the same priority 1
-	// clear kstack
-	for (i = 1; i < 10; i++) {
-		p->kstack[SSIZE -i] = 0;
-	}
-	p->kstack[SSIZE -1] =(int)body;
-	p->ksp = &(p->kstack[SSIZE-9]);
-	//nproc++;
-	// make Umode image by loading /bin/u1 into segment
-	segment = (p->pid + 1)*0x2000;
-	load("/bin/u1", segment);
-	printf("loaded %s at %u\n", "/bin/u1", segment);
-	for (i = 1; i < 13; i++) {
-		switch(i){
-			case 1:		child = 0x0200;		break;
-			case 2:
-			case 11:
-			case 12:	child = segment;	break;
-			default:	child = 0;			break;
-		}
-		put_word(child, segment, 0x2000-i*2);
-	}
-	p->uss = segment;
-	p->usp = 0x2000 - 12*2;
-
-	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
-	enqueue(&readyQueue, p);
-	return(p->pid);
-}
-/*
-
-int kfork(char *filename){
-	PROC *p;
-	int  i, child;
-	u16  segment;
-
-	*** get a PROC for child process: **
-	if ( (p = get_proc(&freeList)) == 0){
-		printf("no more proc\n");
-		return(-1);
-	}
-
-	* initialize the new proc and its stack*
-	p->status = READY;
-	p->ppid = running->pid;
-	p->parent = running;
-	p->priority = 1;                 // all of the same priority 1
+	p->pri = 1;                 // all of the same priority 1
 	// clear kstack
 	for (i = 1; i < 10; i++) {
 		p->kstack[SSIZE -i] = 0;
@@ -160,7 +65,7 @@ int kfork(char *filename){
 	p->kstack[SSIZE -1] =(int)body;
 	p->ksp = &(p->kstack[SSIZE-9]);
 	// make Umode image by loading /bin/u1 into segment
-	segment = (p->pid + 1)*0x2000;
+	segment = (p->pid + 1)*0x1000;
 	load(filename, segment);
 	printf("loaded %s at %u\n", filename, segment);
 	for (i = 1; i < 13; i++) {
@@ -171,17 +76,105 @@ int kfork(char *filename){
 			case 12:	child = segment;	break;
 			default:	child = 0;			break;
 		}
-		put_word(child, segment, 0x2000-i*2);
+		put_word(child, segment, 0x1000-i*2);
 	}
 	p->uss = segment;
-	p->usp = 0x2000 - 12*2;
+	p->usp = 0x1000 - 12*2;
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
 	enqueue(&readyQueue, p);
 	return(p->pid);
 }
-*/
-int kwait(int *val){
+int goUmode();
+
+int copyImage(u16 s1,u16 s2, u16 size)
+{
+	// your copyimage function
+	int i;
+	for (i = 0; i < size; i+=2) {
+		put_word(get_word(s1, i), s2, i);
+	}
+}
+
+
+int fork()
+{
+	PROC *p;
+	int  i, child;
+	u16  segment;
+
+	/*** get a PROC for child process: **/
+	if ( (p = get_proc(&freeList)) == NULL){
+		printf("no more proc\n");
+		return(-1);
+	}
+	printf("ufork\n");
+	/* set procs values to running and ready so we can use it */
+	p->status = READY;
+	p->next = NULL;
+	p->ppid = running->pid;
+	p->parent = running;
+	p->pri = running->pri;
+
+	/* zero out kstack registers*/
+	for (i = 1; i < 10; i++) {
+		p->kstack[SSIZE -i] = 0;
+	}
+	// set address to resume to
+	p->kstack[SSIZE -1] =(int)goUmode;
+	p->ksp = &(p->kstack[SSIZE-9]);
+
+	// set segment to processes data position
+	segment = (p->pid + 1)*0x1000;
+	// copy the segment
+	copyImage(running->uss, segment, 32*1024);
+	printf("loaded at %u\n", segment);
+	// clean the registers and set flag and uCs and uDs to runnings values
+	for (i = 1; i < 13; i++) {
+		child = 0x1000 - i*2;
+		switch(i){
+			case 1: put_word(segment, segment, child); break;
+			case 2: put_word(segment, segment, child); break;
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10: put_word(0,segment, child); break;
+			case 11:
+			case 12: put_word(segment, segment, child); break;
+		}
+	}
+	// same as kfork
+	p->uss = segment;
+	p->usp = 0x1000 - 24;
+	put_word(0, segment, p->usp + 8*2);
+
+	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
+	enqueue(&readyQueue, p);
+	/*
+	   for (i=0; i<NFD; i++){
+	   p->fd[i] = running->fd[i];
+	   if (p->fd[i] != 0){
+	   p->fd[i]->refCount++;
+	   if (p->fd[i]->mode == READ_PIPE)
+	   p->fd[i]->pipe_ptr->nreader++;
+	   if (p->fd[i]->mode == WRITE_PIPE)
+	   p->fd[i]->pipe_ptr->nwriter++;
+	   }
+	   }
+	   */
+	return(p->pid);
+}
+int kwait(){
+	int i;
+	wait(i);
+	return i;
+}
+
+int wait(int *val){
 	PROC *p;
 	int i, child;
 	while (1) {
@@ -205,7 +198,16 @@ int kwait(int *val){
 		sleep(running);
 	}
 }
-int kwakeup(int event){
+int sleep(int event){
+	running->event = event;
+	running->status = SLEEP;
+	enqueue(&sleepList, running);
+	//enqueue(running, &sleepList);
+	tswitch();
+}
+
+
+int wakeup(int event){
 	PROC *p = sleepList;
 	PROC *t = sleepList;
 	if (p == NULL)
@@ -216,7 +218,7 @@ int kwakeup(int event){
 			t->next = p->next;
 			if (p == sleepList)
 				sleepList = p->next;
-			enqueue(&readyQueue, p);
+			enqueue(&readyQueue,p);
 			return;
 		} else{
 			t = p;
@@ -224,6 +226,7 @@ int kwakeup(int event){
 		}
 	}
 }
+
 
 int kexit(int *val){
 	int i = 0;
@@ -238,15 +241,16 @@ int kexit(int *val){
 		if (proc[i].ppid == running->pid){
 			proc[i].ppid = 1;
 			if (proc[i].status == ZOMBIE)
-				kwakeup(&proc[1]);
+				wakeup(&proc[1]);
 		}
 	}
 	running->exitCode = val;
 	running->status = ZOMBIE;
 
-	kwakeup(&proc[running->ppid]);
+	wakeup(&proc[running->ppid]);
 	tswitch();
 }
+
 int kexec(char *filename)
 {
 	// your exec function

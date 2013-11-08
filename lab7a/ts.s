@@ -7,7 +7,6 @@
 .globl _main,_prints                                 
 .globl _tswitch,_running,_scheduler
 .globl _int80h,_kcinth
-!.globl _kbinth,_kbhandler
 .globl _diskr,_diskw
 .globl _getcs, _goUmode, _procSize
 .globl _get_byte,_put_byte

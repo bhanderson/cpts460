@@ -1,6 +1,7 @@
 int kmode()
 {
 	body();
+	running->inkmode ++;
 }
 
 char *pStatus[] = {"FREE","READY","SLEEP","ZOMBIE","BLOCK",0};
@@ -54,6 +55,8 @@ int kcinth()
 
 		case 9 : r = sout(y,z);       break;
 		case 10: r = sin(y,z);        break;
+
+		case 42: r = getc();         break;
 
 		case 99: r = kexit();         break;
 
