@@ -17,7 +17,7 @@ PIPE pipe[NPIPE];
 /******** YOUR .c files up to fork-exec ***********
  *************************************************/
 
-#include "kernel.c"
+//#include "kernel.c"
 #include "forkexec.c"
 #include "int.c"
 #include "wait.c"
@@ -77,6 +77,51 @@ int set_vec(vector, addr) u16 vector, addr;
 	location = vector << 2;
 	put_word(addr, 0, location);
 	put_word(0x1000,0,location+2);
+}
+
+int kfork(char *filename){
+	PROC *p;
+	int  i, child;
+	u16  segment;
+
+	/*** get a PROC for child process: **/
+	if ( (p = get_proc(&freeList)) == 0){
+		printf("no more proc\n");
+		return(-1);
+	}
+
+	/* initialize the new proc and its stack*/
+	p->status = READY;
+	p->ppid = running->pid;
+	p->parent = running;
+	p->priority = 1;                 // all of the same priority 1
+	// clear kstack
+	for (i = 1; i < 10; i++) {
+		p->kstack[SSIZE -i] = 0;
+	}
+	p->kstack[SSIZE -1] =(int)body;
+	p->ksp = &(p->kstack[SSIZE-9]);
+	nproc++;
+	// make Umode image by loading /bin/u1 into segment
+	segment = (p->pid + 1)*0x2000;
+	load("/bin/u1", segment);
+	printf("loaded %s at %u\n", "/bin/u1", segment);
+	for (i = 1; i < 13; i++) {
+		switch(i){
+			case 1:		child = 0x0200;		break;
+			case 2:
+			case 11:
+			case 12:	child = segment;	break;
+			default:	child = 0;			break;
+		}
+		put_word(child, segment, 0x2000-i*2);
+	}
+	p->uss = segment;
+	p->usp = 0x2000 - 12*2;
+
+	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
+	enqueue(&readyQueue, p);
+	return(p->pid);
 }
 
 main()
