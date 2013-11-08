@@ -1,9 +1,11 @@
 #include "type.h"
-void enqueue(PROC *p, PROC **queue);
+PROC* getproc();
+PROC* get_proc(PROC * list);
+void enqueue(PROC **queue, PROC *p);
 PROC *dequeue(PROC **queue);
 PROC proc[NPROC], *freeList, *sleepList, *running, *readyQueue;
 int procSize = sizeof(PROC);
-
+int goUmode();
 /******************** use your OWN LAB5 code *****************
 #include "io.c"
 #include "queue.c"

@@ -1,5 +1,5 @@
-/*
-int enqueue(PROC *p, PROC **queue);/*
+
+void enqueue(PROC **queue, PROC *p)
 {
 	PROC *a, *b;
 	a = *queue;
@@ -16,26 +16,24 @@ int enqueue(PROC *p, PROC **queue);/*
 	}
 	a->next = p;
 	p->next = b;
-	return 1;
 }
-*/
-PROC *dequeue(PROC **queue);/*{
+
+PROC *dequeue(PROC **queue){
 	PROC *p = *queue;
 	if(*queue != 0){
 		*queue = (*queue)->next;
 	}
 	return p;
 }
-*/
-PROC *getproc(PROC **list){
-	PROC *p = *list;
-	if (*list==0){
-		return 0;
-	} else {
-		*list = (*list)->next;
-	}
-	return p;
+
+PROC *getproc(){
+	return get_proc(freeList);
 }
+
+PROC *get_proc(PROC **list){
+	return dequeue(freeList);
+}
+
 int printQueue(PROC **list){
 	PROC *p = list;
 	while(p!=0){
@@ -52,7 +50,7 @@ int kfork(char *filename){
 	u16  segment;
 
 	/*** get a PROC for child process: **/
-	if ( (p = getproc(&freeList)) == 0){
+	if ( (p = get_proc(&freeList)) == 0){
 		printf("no more proc\n");
 		return(-1);
 	}
@@ -69,7 +67,7 @@ int kfork(char *filename){
 	p->kstack[SSIZE -1] =(int)body;
 	p->ksp = &(p->kstack[SSIZE-9]);
 	// make Umode image by loading /bin/u1 into segment
-	segment = (p->pid + 1)*0x1000;
+	segment = (p->pid + 1)*0x2000;
 	load(filename, segment);
 	printf("loaded %s at %u\n", filename, segment);
 	for (i = 1; i < 13; i++) {
@@ -80,14 +78,14 @@ int kfork(char *filename){
 			case 12:	child = segment;	break;
 			default:	child = 0;			break;
 		}
-		put_word(child, segment, 0x8000-i*2);
+		put_word(child, segment, 0x2000-i*2);
 	}
 	p->uss = segment;
-	p->usp = 0x8000 - 12*2;
+	p->usp = 0x2000 - 12*2;
 
 	printf("Proc%d forked a child %d segment=%x\n", running->pid,p->pid,segment);
 	enqueue(p, &readyQueue);
-	return(p);
+	return(p->pid);
 }
 int kwait(int *val){
 	PROC *p;
@@ -180,11 +178,11 @@ int kexec(char *filename)
 			case 10:	put_word(0, segment, 0x2000-i*2); continue;
 			default:	child = 0;			break;
 		}
-		put_word(child, segment, 0x8000-i*2);
+		put_word(child, segment, 0x2000-i*2);
 	}
 	// set uss to file position and set usp ustack top position
 	running->uss = segment;
-	running->usp = 0x8000-24;
+	running->usp = 0x2000-24;
 	put_word(0, segment, running->usp + 8*2);
 	return 1;
 

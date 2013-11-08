@@ -24,7 +24,7 @@ int V(s) struct semaphore *s;
     if (s->value <= 0){
         p = dequeue(&s->queue);
         p->status = READY;
-        enqueue(p, &readyQueue);
+        enqueue(running, &readyQueue);
     }
     int_on(sr);
 }
