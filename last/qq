@@ -1,0 +1,2 @@
+sudo ./mku $1
+qemu-system-i386 -hda vdisk
