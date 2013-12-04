@@ -3,7 +3,7 @@ int stdin, stdout, stderr;
 
 #include "ucode.c"
 
-int main(int argc, const char *argv[])
+int main(int argc, char *argv[])
 {
 	stdin = open("/dev/tty0", 0);
 	stdout = open("/dev/tty0", 1);
