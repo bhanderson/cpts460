@@ -1,19 +1,23 @@
-#ifndef O_RDONLY
-#define O_RDONLY 1
+#ifndef NULL
+#define NULL 0
 #endif
+#ifndef true
+#define true 1
+#endif
+#ifndef false
+#define false 0
+#endif
+#include "ucode.c"
 
 char *tty;
 int stdin, stdout, stderr;
 
-int main(int argc, const char *argv[])
-{
-	char username[32], password[32];
-	char *line = 0;
-	size_t len = 0;
-	ssize_t read;
-
+int main(int argc, char *argv[]){
+	char username[32], user[32], password[32], pass[32], buf[1024];
+	char name[32], program[32], home[32];
+	int valid = false;
+	int passwdfd, gid, uid;
 	char *tok;
-	FILE *passwd;
 
 	tty = argv[1];
 
@@ -42,18 +46,40 @@ int main(int argc, const char *argv[])
 		// read user passwd
 		gets(password);
 		// verify user name and passwd from /etc/passwd file
-		passwd = open("/etc/passwd", O_RDONLY);
-		while(1){
-			
+		passwdfd = open("/etc/passwd", O_RDONLY);
+		if (read(passwdfd, buf, 1024)<0){
+			printf("ERROR READING /etc/passwd");
 		}
-
-
-		// if (user account valid)
-		// 		setuid to user uid.
-		// 		chdir to user HOME dir
-		// 		exec to the program in the user's account
-		// 	else
-		// 		printf("login failed, try again\n");
+		tok = strtok(buf,":\n");
+		while(tok != 0 && valid == false){
+			if (strcmp(tok, username) == 0){
+				strcpy(user, username);
+				strcpy(pass, strtok(NULL, ":\n"));
+				// if (user account valid)
+				if (strcmp(pass, password) == 0){
+					valid = true;
+					// set uid to user uid.
+					uid = atoi(strtok(NULL, ":\n"));
+					// set gid to user gid
+					gid = atoi(strtok(NULL, ":\n"));
+					// get full name of user
+					strcpy(name, strtok(NULL, ":\n"));
+					// get user home directory
+					strcpy(home, strtok(NULL, ":\n"));
+					// get user shell or program to run
+					strcpy(program, strtok(NULL, ":\n"));
+					// chdir to user HOME dir
+					chdir(home);
+					// exec to the program in the user's account
+					exec(program);
+				} else {
+					printf("pass: %s for %s is invalid\n", password, username);
+					break;
+				}
+			}
+			tok = strtok(NULL, ":\n");
+		}
 	}
+	close(passwdfd);
 	return 0;
 }
