@@ -11,12 +11,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	while (read(catfd, &c, 1)>0) {
-		if (c == '\n'){
-			putc('\n');
+		putc(c);
+		if (c == '\n')
 			putc('\r');
-		}else{
-			putc(c);
-		}
 	}
 	printf("\n");
 	close(catfd);
