@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 	sfd = open(argv[1], O_RDONLY);
 	dfd = open(argv[2], O_WRONLY | O_CREAT);
 	if(sfd <0 || dfd < 0){
-		printf("Cp cant open source or cant create destination file");
+		printf("Cp cant open source or cant create destination file\n");
 		return 1;
 	}
 	while((r = read(sfd, buf, 128))>0){
