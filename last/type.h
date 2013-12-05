@@ -1,4 +1,5 @@
 #define SSIZE 512
+#define NULL 0
 
 typedef unsigned long  u32;
 typedef unsigned short u16;
