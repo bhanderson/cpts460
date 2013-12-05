@@ -1,3 +1,6 @@
 *.o
 mtx
 a.out
+vdisk
+mtxlib
+vdisk*

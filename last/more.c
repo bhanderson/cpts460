@@ -27,7 +27,6 @@ void ppage(int morefd){
 void pline(int morefd){
 	int j, size;
 	char c;
-	putc('\n');
 	for (j = 0; j < 80; j++) {
 		size = read(morefd, &c, 1);
 		putc(c);
@@ -52,8 +51,8 @@ int main(int argc, char *argv[])
 	}
 	while(1){
 		ppage(morefd);
+		printf("enter: next line q: quit space: next page");
 		while (1) {
-			printf("enter: next line q: quit space: next page");
 			input = getc();
 			switch(input){
 				case '\r':
