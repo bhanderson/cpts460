@@ -51,9 +51,9 @@ typedef struct ext2_inode {
 	u16	i_links_count;	/* Links count */
 	u32	i_blocks;	/* Blocks count */
 	u32	i_flags;	/* File flags */
-        u32     dummy;
+	u32     dummy;
 	u32	i_block[15];    /* Pointers to blocks */
-        u32     pad[7];         /* inode size MUST be 128 bytes */
+	u32     pad[7];         /* inode size MUST be 128 bytes */
 } INODE;
 
 typedef struct ext2_dir_entry_2 {
@@ -88,88 +88,88 @@ typedef struct ext2_dir_entry_2 {
 #define O_APPEND	  02000
 
 typedef struct Oft{
-  int   mode;
-  int   refCount;
-  struct Minode *inodeptr;
-  struct pipe *pipe_ptr;
-  long  offset;
-  char  name[32];
+	int   mode;
+	int   refCount;
+	struct Minode *inodeptr;
+	struct pipe *pipe_ptr;
+	long  offset;
+	char  name[32];
 } OFT;
 
-typedef struct Minode{		
-  INODE    INODE; 
-  ushort   dev, ino;
-  ushort   refCount;
-  ushort   dirty;
-  ushort   mounted;
-  struct Mount *mountptr;
-  char     name[32];  
+typedef struct Minode{
+	INODE    INODE;
+	ushort   dev, ino;
+	ushort   refCount;
+	ushort   dirty;
+	ushort   mounted;
+	struct Mount *mountptr;
+	char     name[32];
 } MINODE;
 
 
 typedef struct Mount{
-        int    ninodes;
-        int    nblocks;
-        int    dev, busy;   
-        struct Minode *mounted_inode;
-        char   name[32]; 
-        char   mount_name[32];
+	int    ninodes;
+	int    nblocks;
+	int    dev, busy;
+	struct Minode *mounted_inode;
+	char   name[32];
+	char   mount_name[32];
 } MOUNT;
 
 typedef struct pipe{
-        char  buf[PSIZE];
-        int   head, tail, hasData, hasRoom;
-        OFT   *read, *write;
-        int   busy;
+	char  buf[PSIZE];
+	int   head, tail, hasData, hasRoom;
+	OFT   *read, *write;
+	int   busy;
 }PIPE;
 
 
 typedef struct stat {
-  ushort st_dev;		/* major/minor device number */
-  ushort st_ino;		/* i-node number */
-  ushort st_mode;		/* file mode, protection bits, etc. */
-  ushort st_nlink;		/* # links; TEMPORARY HACK: should be nlink_t*/
-  ushort st_uid;			/* uid of the file's owner */
-  ushort st_gid;		/* gid; TEMPORARY HACK: should be gid_t */
-  ushort st_rdev;
-  long   st_size;		/* file size */
-  long   st_atime;		/* time of last access */
-  long   st_mtime;		/* time of last data modification */
-  long   st_ctime;		/* time of last file status change */
+	ushort st_dev;		/* major/minor device number */
+	ushort st_ino;		/* i-node number */
+	ushort st_mode;		/* file mode, protection bits, etc. */
+	ushort st_nlink;		/* # links; TEMPORARY HACK: should be nlink_t*/
+	ushort st_uid;			/* uid of the file's owner */
+	ushort st_gid;		/* gid; TEMPORARY HACK: should be gid_t */
+	ushort st_rdev;
+	long   st_size;		/* file size */
+	long   st_atime;		/* time of last access */
+	long   st_mtime;		/* time of last data modification */
+	long   st_ctime;		/* time of last file status change */
 } STAT;
 
 typedef struct stty TTY;
 
 typedef struct proc{
-        struct  proc *next;
-        int    *saved_ksp; 
-        int     uss,usp;        // at 4,6: saved Umode SS, SP
+	struct  proc *next;
+	int    *saved_ksp;
+	int     uss,usp;        // at 4,6: saved Umode SS, SP
 
-        int     uid;
-        int     gid;
-        int     pid;
-        int     ppid;
-        int     status;
-        int     pri;           /* scheduling priority */
-        char    name[16];      /* name string */
-        int     event;         // sleep event
+	int     uid;
+	int     gid;
+	int     pid;
+	int     ppid;
+	int     status;
+	int     pri;           /* scheduling priority */
+	char    name[16];      /* name string */
+	int     event;         // sleep event
 
-         int    exitValue;  // enforce exit code in this MTX
+	int    exitValue;  // enforce exit code in this MTX
 
-        OFT    *fd[NFD];       /* file descriptors */
-        MINODE *cwd;           /* CWD */
-        char    tty[16];        /* opened /dev/ttyXX */  
-        int     time;
-  int     signal;
-  int     sig[10];
-  struct semaphore *sem;       // ptr to semaphore currently BLOCKed on
-  int     pause;
-  ushort  segment, tsize, dsize, size;
-  int kstack[SSIZE];
-}PROC;        
+	OFT    *fd[NFD];       /* file descriptors */
+	MINODE *cwd;           /* CWD */
+	char    tty[16];        /* opened /dev/ttyXX */
+	int     time;
+	int     signal;
+	int     sig[10];
+	struct semaphore *sem;       // ptr to semaphore currently BLOCKed on
+	int     pause;
+	ushort  segment, tsize, dsize, size;
+	int kstack[SSIZE];
+}PROC;
 
 /* Default dir and regulsr file modes */
-#define DIR_MODE          0040777 
+#define DIR_MODE          0040777
 #define FILE_MODE         0100644
 #define SUPER_MAGIC       0xEF53
 #define SUPER_USER        0
