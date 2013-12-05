@@ -40,6 +40,7 @@ char *commands[] = {
 	// shell commands
 	0
 };
+char cmdline[128];
 char *usertoks[20];
 char tokline[128];
 char *help = "\
@@ -98,7 +99,12 @@ void shcmd(int c){
 }
 
 void myrun(int c){
-
+	int mypipe[2];
+	char newline[128];
+	int cpid, i;
+	char *cp = newline;
+	int tempint;
+	STAT temp_stat;
 	for (i = 0; usertoks[i] != 0; i++) {
 		// specific for io ops
 		switch(usertoks[i][0]){
@@ -106,37 +112,56 @@ void myrun(int c){
 				close(1);
 				if(usertoks[i][1] == '>'){ // append
 					i++;
-					open(usertoks[i], O_WRONLY | O_CREAT | O_APPEND);
+					if (open(usertoks[i], O_WRONLY | O_CREAT | O_APPEND) != 1){
+						write(2, "Cannot open file\n", 17);
+						return;
+					}
 				} else { // create
 					i++;
 					if (open(usertoks[i], O_WRONLY | O_CREAT) != 1){
 						write(2, "Cannot create file\n", 21);
-						exit(0);
+						return;
 					}
 				}
 				break;
-			case '>>':
-				break;
 			case '<':
+				close(0);
+				i++;
+				printf("io: %s", usertoks[i]);
+				tempint = open(usertoks[i], O_RDONLY);
+				printf("fd: %d\n", tempint);
 				break;
 			case '|':
-				break;
+				pipe(mypipe);
+				cpid = fork();
+				if(cpid == -1){
+					printf("fork error");
+					//exit(-1);
+					return;
+				}
 
+			default:
+				strcpy(cp, usertoks[i]);
+				cp += strlen(usertoks[i]);
+				*(cp++) = ' ';
 		}
 	}
+	*(cp-1) = 0;
+	//write(2, cmdline, strlen(cmdline));
+	exec(cmdline);
+	return;
 }
 
 int main(int argc, char *argv[])
 {
-	char line[128];
 	int cmd;
 	while(1){// main program loop
 		printf("bhsh # : ");
-		gets(line);
-		if (line[0]==0) {
+		gets(cmdline);
+		if (cmdline[0]==0) {
 			continue;
 		}
-		strcpy(tokline, line);
+		strcpy(tokline, cmdline);
 		// tokenize the input
 		linetoken(tokline);
 
