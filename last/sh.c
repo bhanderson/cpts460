@@ -127,9 +127,11 @@ void myrun(int c){
 			case '<':
 				close(0);
 				i++;
-				printf("io: %s", usertoks[i]);
-				tempint = open(usertoks[i], O_RDONLY);
-				printf("fd: %d\n", tempint);
+				//printf("io: %s", usertoks[i]);
+				open(usertoks[i], O_RDONLY);
+				//printf("fd: %d\n", tempint);
+				//i++; // get rid of 
+				//printf("tok: %s", usertoks[i]);
 				break;
 			case '|':
 				pipe(mypipe);
@@ -139,16 +141,19 @@ void myrun(int c){
 					//exit(-1);
 					return;
 				}
+				break;
 
 			default:
 				strcpy(cp, usertoks[i]);
+				printf("cp: %s", cp);
 				cp += strlen(usertoks[i]);
 				*(cp++) = ' ';
+				break;
 		}
 	}
 	*(cp-1) = 0;
-	//write(2, cmdline, strlen(cmdline));
-	exec(cmdline);
+	write(2, newline, strlen(newline));
+	exec(newline);
 	return;
 }
 
@@ -166,7 +171,7 @@ int main(int argc, char *argv[])
 		linetoken(tokline);
 
 		// find the first command of the process
-		printf("cmd:%s\n",usertoks[0]);
+		//printf("cmd:%s\n",usertoks[0]);
 		if ((cmd = getcmd(usertoks[0])) < 5){
 			shcmd(cmd);
 		} else {
