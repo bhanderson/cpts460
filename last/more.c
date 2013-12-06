@@ -36,8 +36,16 @@ void pline(int morefd){
 int main(int argc, char *argv[])
 {
 	char c, input;
+	char tty[64];
 	int morefd, read, i, j;
-	morefd = open(argv[1], O_RDONLY);
+	if(argc==1){
+		morefd = dup(0);
+		close(0);
+		gettty(tty);
+		open(tty, O_RDONLY);
+	}
+	else
+		morefd = open(argv[1], O_RDONLY);
 	printf("Bryce's more fd=%d\n\n", morefd);
 	if (morefd<0) {
 		printf("More cant find file\n");
