@@ -2,6 +2,7 @@ int pid, child, status;
 int stdin, stdout, stderr;
 
 #include "ucode.c"
+// ttyS0 ttyS1
 
 int main(int argc, char *argv[])
 {
@@ -17,9 +18,9 @@ int main(int argc, char *argv[])
 		login();
 	return 0;
 }
-int login()
+int login(char *s)
 {
-	exec("login /dev/tty0");
+	exec(s);
 }
 int parent()
 {
@@ -30,7 +31,9 @@ int parent()
 			printf("BHINIT : forking another login\n");
 			child = fork();
 			if (!child) {
-				login();
+				login("login /dev/tty0");
+				login("login /dev/ttyS0");
+				login("login /dev/ttyS1");
 			}
 		} else
 			printf("INIT : buried an orphan child %d\n", pid);

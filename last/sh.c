@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 	while(1){
 		char inputline[128], temp_line[128], *tok, execline[128];
 		int i = 0, j, cmd, status, pid, fd, pos = 0;
+		int pipes[2];
 		printf("bhsh # : ");
 		gets(inputline);
 		strcpy(temp_line, inputline);
@@ -90,6 +91,21 @@ int main(int argc, char *argv[])
 					if (fd != 0){
 						write(1, "READ ERROR\n", 11);
 						exit(-1);
+					}
+				}
+				if(!strcmp(tokens[i], "|")){
+					pipe(pipes);
+					pid = fork();
+					pos = i;
+					if (pid) {
+						tokens[i+1] = '\0';
+						close(pipes[0]);
+						close(1);
+						dup2(pipes[1], 1);
+					} else {
+						close(pipes[1]);
+						close(0);
+						dup2(pipes[0],0);
 					}
 				}
 				i++;
