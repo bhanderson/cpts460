@@ -1,8 +1,8 @@
-int pid, child, status;
+int pid, status;
+int children[3] = 0;
 int stdin, stdout, stderr;
 
 #include "ucode.c"
-// ttyS0 ttyS1
 
 int main(int argc, char *argv[])
 {
@@ -11,32 +11,68 @@ int main(int argc, char *argv[])
 	stderr = open("/dev/tty0", 2);
 
 	printf("BHINIT : fork a login task on console\n");
-	child = fork();
-	if (child)
-		parent();
-	else
-		login();
+	children[0] = fork();
+	if (children[0]) {
+		children[1] = fork();
+
+		if (children[1]) {
+			children[2] = fork();
+
+			if (children[2]) {
+				parent();
+
+			} else {
+				login(2);
+			}
+
+		} else {
+			login(1);
+		}
+
+	} else {
+		login(0);
+	}
+
 	return 0;
 }
-int login(char *s)
+int login(int i)
 {
-	exec(s);
+	switch(i){
+		case 0:
+			exec("login /dev/tty0");
+			break;
+		case 1:
+			exec("login /dev/ttyS0");
+			break;
+		case 2:
+			exec("login /dev/ttyS1");
+			break;
+		default:
+			break;
+	}
 }
 int parent()
 {
 	while (1) {
 		printf("BHINIT : waiting .....\n");
 		pid = wait(&status);
-		if (pid == child){
+		if (pid == children[0] || pid == children[1] || pid == children[2]){
 			printf("BHINIT : forking another login\n");
-			child = fork();
-			if (!child) {
-				login("login /dev/tty0");
-				login("login /dev/ttyS0");
-				login("login /dev/ttyS1");
+			if (pid == children[0]){
+				children[0] = fork();
+				if(!children[0])
+					login(0);
+			} else if (pid == children[1]){
+				children[1] = fork();
+				if(!children[1])
+					login(1);
+			} else if (pid == children[2]){
+				children[2] = fork();
+				if(!children[2])
+					login(2);
 			}
-		} else
-			printf("INIT : buried an orphan child %d\n", pid);
-
+		} else {
+			printf("INIT: burying child %d", pid);
+		}
 	}
 }

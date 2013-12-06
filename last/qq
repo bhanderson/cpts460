@@ -1,2 +1,3 @@
-sudo ./mku $1
-qemu -hda vdisk -m 520m -localtime -cdrom MTXinstallCD.iso
+sudo ./ma
+qemu -hda vdisk -m 520m -localtime -cdrom MTXinstallCD.iso -serial /dev/pts/1 \
+-serial /dev/pts/2

@@ -10,19 +10,19 @@ VDISK=vdisk
 SECTOR=$(./ptable vdisk $PARTITION)
 OFFSET=$(expr $SECTOR \* 512)
 
-echo partition=$PARTITION sector=$SECTOR offset=$OFFSET
+#echo partition=$PARTITION sector=$SECTOR offset=$OFFSET
 #read dummy
 
 mount -o loop,offset=$OFFSET $VDISK /mnt
 
-echo compiling $1.c .....
+#echo compiling $1.c .....
 as86 -o u.o u.s
 bcc -c -ansi $1.c
 
-echo linking .......
+#echo linking .......
 ld86 u.o $1.o mtxlib /usr/lib/bcc/libc.a 2> /dev/null
 
-echo copying $1 into $VDISK/bin/$1
+#echo copying $1 into $VDISK/bin/$1
 
 cp -av a.out /mnt/bin/$1
 umount /mnt

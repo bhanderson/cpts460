@@ -3,12 +3,6 @@
 void ppage(int morefd){
 	int i, j, size;
 	char c;
-	/*
-	   while(read(morefd, &c, 1) > 0){
-	   putc(c);
-	   }
-	   return;
-	   */
 	putc('\n');
 	for (i = 0; i < 24; i++) {
 		for (j = 0; j < 80; j++) {
@@ -51,7 +45,7 @@ int main(int argc, char *argv[])
 	}
 	while(1){
 		ppage(morefd);
-		printf("enter: next line q: quit space: next page");
+		//printf("enter: next line q: quit space: next page");
 		while (1) {
 			input = getc();
 			switch(input){
@@ -66,7 +60,7 @@ int main(int argc, char *argv[])
 					ppage(morefd);
 					break;
 				default:
-					ppage(morefd);
+					pline(morefd);
 					break;
 			}
 		}
