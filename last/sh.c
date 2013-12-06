@@ -40,41 +40,11 @@ int getcmd(char *cmd){
 	return -1;
 }
 
-int iosetup(){
-	int fd;
-	int i;
-	while(tokens[i]){
-		printf("in while\n");
-		switch(tokens[i][0]){
-			case '>':
-				write(1, "IN IO>\n", 7);
-				close(1); // close stdout so open uses it
-				if(tokens[i][1]=='>'){ // append to file
-					fd = open(tokens[i+1], O_WRONLY | O_APPEND | O_CREAT);
-					if(fd != 1)
-						write(1, "APPEND ERROR\n", 13);
-				} else {
-					fd = open(tokens[i+1], O_WRONLY | O_CREAT);
-					if(fd != 1)
-						write(1, "WRITE ERROR\n", 12);
-				}
-				return i;
-			case '<':
-				return i;
-			case '|':
-				return i;
-			default:
-				i++;
-		}
-	}
-	return 0;
-}
-
 int main(int argc, char *argv[])
 {
 	while(1){
-		char inputline[128], temp_line[128], *tok;
-		int i = 0, cmd, status, pid, fd, pos = 0;
+		char inputline[128], temp_line[128], *tok, execline[128];
+		int i = 0, j, cmd, status, pid, fd, pos = 0;
 		printf("bhsh # : ");
 		gets(inputline);
 		strcpy(temp_line, inputline);
@@ -99,37 +69,37 @@ int main(int argc, char *argv[])
 					close(1);
 					pos = i;
 					fd = open(tokens[i+1], O_WRONLY | O_CREAT);
-					if(fd != 1)
+					if(fd != 1){
 						write(1, "WRITE ERROR\n", 12);
+						exit(-1);
+					}
+				}
+				if(!strcmp(tokens[i], ">>")){
+					close(1);
+					pos = i;
+					fd = open(tokens[i+1], O_WRONLY | O_CREAT | O_APPEND);
+					if (fd != 1) {
+						write(1, "WRITE ERROR\n", 12);
+						exit(-1);
+					}
+				}
+				if(!strcmp(tokens[i], "<")){
+					close(0);
+					pos = i;
+					fd = open(tokens[i+1], O_RDONLY);
+					if (fd != 0){
+						write(1, "READ ERROR\n", 11);
+						exit(-1);
+					}
 				}
 				i++;
-				/*
-				switch(tokens[i][0]){
-					case '>':
-						write(1, "IN IO>\n", 7);
-						close(1); // close stdout so open uses it
-						if(tokens[i][1]=='>'){ // append to file
-							fd = open(tokens[i+1], O_WRONLY | O_APPEND | O_CREAT);
-							if(fd != 1)
-								write(1, "APPEND ERROR\n", 13);
-						} else {
-							fd = open(tokens[i+1], O_WRONLY | O_CREAT);
-							if(fd != 1)
-								write(1, "WRITE ERROR\n", 12);
-						}
-						pos = i;
-					case '<':
-						return i;
-					case '|':
-						return i;
-					default:
-						i++;
-				} // end switch*/
-			} // end while
-			printf("IO: %d char %s\n", pos, tokens[pos]);
+			}
 			if(pos){// there is a io redirect
-				write(1, "IO!\n", 4);
-				exec(tokens[0]);
+				for (j = 0; j < pos; j++) {
+					strcat(execline, " ");
+					strcat(execline, tokens[j]);
+				}
+				exec(execline);
 				exit(1);
 			} else {
 				exec(inputline);
