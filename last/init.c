@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 
 	printf("BHINIT : fork a login task on console\n");
 	children[0] = fork();
+	// check all children if dont exist open all the files else login that one 
 	if (children[0]) {
 		children[1] = fork();
 
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+// execute teh login program
 int login(int i)
 {
 	switch(i){
@@ -51,11 +53,13 @@ int login(int i)
 			break;
 	}
 }
+// if the original child isnt there
 int parent()
 {
 	while (1) {
 		printf("BHINIT : waiting .....\n");
 		pid = wait(&status);
+		// check if i am a child
 		if (pid == children[0] || pid == children[1] || pid == children[2]){
 			printf("BHINIT : forking another login\n");
 			if (pid == children[0]){

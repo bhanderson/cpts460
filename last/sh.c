@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
 		printf("bhsh # : ");
 		gets(inputline);
 		strcpy(temp_line, inputline);
+		// tokenize all the input
 		tok = strtok(temp_line, " ");
 		while(tok){
 			tokens[i]  = tok;
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
 		}
 		tokens[i] = 0; // end tokens with 0
 		cmd = getcmd(tokens[0]);
+		// check if its a basic command
 		switch(cmd){
 			case 4: // ?
 				printf(menu);
@@ -94,6 +96,7 @@ int main(int argc, char *argv[])
 				break;
 		}
 		//printf("cmd: %d\n", cmd);
+		// fork that child
 		pid = fork();
 		if (pid){ // parent waits
 			//printf("in parent sh waiting\n");
@@ -102,6 +105,7 @@ int main(int argc, char *argv[])
 			i = 0;
 			cp = inputline;
 			for(i=0;tokens[i];i++){
+				// check if it has a io redirection
 				switch(tokens[i][0]){
 					case '>':
 						close(1);
@@ -122,14 +126,18 @@ int main(int argc, char *argv[])
 						}
 						break;
 					case '|':
+						// initialize the pipes
 						pipe(pipes);
+						// fork another child
 						pid = fork();
+						// if we are the child close writer and reader of parent
 						if (pid){
 							tokens[i+1] = '\0';
 							close(pipes[0]);
 							close(1);
-							dup2(pipes[1], 1);
+							dup2(pipes[1], 1); // copy the pipe over
 						} else {
+							// else run the command and ouput to the child
 							cp = inputline;
 							close(pipes[1]);
 							close(0);

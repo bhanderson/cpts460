@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
 	if (argc > 1){
 		catfd = open(argv[1], O_RDONLY);
 	} else {
+		// cat takes input from stdin
 		catfd = 0;
 	}
 	printf("Bryce's almost cool cat MEOW fd=%d\n\n", catfd);
@@ -14,6 +15,7 @@ int main(int argc, char *argv[])
 		printf("Cat cant meow file\n");
 		return -1;
 	}
+	// while its not the end of the file
 	while (read(catfd, &c, 1)>0) {
 		putc(c);
 		if (catfd != 0 && c == '\n')

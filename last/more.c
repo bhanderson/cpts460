@@ -1,5 +1,6 @@
 #include "ucode.c"
 
+// print just a page
 void ppage(int morefd){
 	int i, j, size;
 	char c;
@@ -18,6 +19,7 @@ void ppage(int morefd){
 	return;
 }
 
+// print just a line
 void pline(int morefd){
 	int j, size;
 	char c;
@@ -38,6 +40,7 @@ int main(int argc, char *argv[])
 	char c, input;
 	char tty[64];
 	int morefd, read, i, j;
+	// get the file descriptor or stdin
 	if(argc==1){
 		morefd = dup(0);
 		close(0);
@@ -54,6 +57,7 @@ int main(int argc, char *argv[])
 	while(1){
 		ppage(morefd);
 		//printf("enter: next line q: quit space: next page");
+		// get user inputj
 		while (1) {
 			input = getc();
 			switch(input){
